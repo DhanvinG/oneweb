@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .animate-marquee {
+    animation: marquee 25s linear infinite;
+  }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-highlight-swipe {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: highlight-swipe 900ms cubic-bezier(0.22, 1, 0.36, 1) 350ms both;
+}
+
+@keyframes highlight-swipe {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  12% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.animate-arrow-draw path {
+  opacity: 0;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: arrow-draw 500ms ease-out 650ms forwards;
+}
+
+.animate-arrow-draw path:nth-child(2) {
+  animation-delay: 1.05s;
+  animation-duration: 220ms;
+}
+
+@keyframes arrow-draw {
+  from {
+    opacity: 1;
+    stroke-dashoffset: 1;
+  }
+  to {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-highlight-swipe,
+  .animate-arrow-draw path {
+    animation: none;
+  }
+
+  .animate-highlight-swipe {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .animate-arrow-draw path {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+.resource-scrollbar {
+  scrollbar-color: #3083fd rgba(48, 131, 253, 0.16);
+  scrollbar-width: thin;
+}
+
+.resource-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.resource-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.resource-scrollbar::-webkit-scrollbar-track {
+  background: rgba(48, 131, 253, 0.16);
+  border-radius: 999px;
+}
+
+.resource-scrollbar::-webkit-scrollbar-thumb {
+  background: #3083fd;
+  border-radius: 999px;
+}
+
+.resource-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #ff5a00;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
