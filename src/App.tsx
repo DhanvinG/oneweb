@@ -118,27 +118,46 @@ function PartnershipsPage() {
             </a>
           </header>
 
-          <section className="mt-12 border-[3px] border-black bg-white p-3 md:mt-16 md:p-5">
-            <div className="mb-3 flex flex-col gap-3 border-b-[3px] border-black px-2 pb-4 sm:flex-row sm:items-center sm:justify-between md:px-3">
+          <section className="mt-12 border-[3px] border-black bg-white p-4 md:mt-16 md:p-7">
+            <div className="flex flex-col gap-4 border-b-[3px] border-black px-1 pb-5 sm:flex-row sm:items-end sm:justify-between md:px-2">
               <div>
                 <p className="font-mono text-xs font-black uppercase tracking-[0.15em] text-[#ff5a00]">Partnership overview</p>
-                <h2 className="mt-1 text-xl font-black uppercase tracking-[-0.025em] md:text-2xl">Learn how to participate</h2>
+                <h2 className="mt-1 text-2xl font-black uppercase tracking-[-0.025em] md:text-3xl">Read the overview</h2>
               </div>
-              <a
-                href="/OneWeb_Partnership_Overview.pdf"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex w-fit items-center gap-2 border-b-2 border-black pb-1 font-mono text-sm font-black uppercase"
-              >
-                Open PDF <ArrowRight size={18} strokeWidth={3} />
-              </a>
+              <div className="flex flex-wrap items-center gap-4 font-mono text-sm font-black uppercase">
+                <a href="#partnership-page-1" className="border-b-2 border-black pb-1">Page 1</a>
+                <a href="#partnership-page-2" className="border-b-2 border-black pb-1">Page 2</a>
+                <a
+                  href="/OneWeb_Partnership_Overview.pdf"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 border-[2px] border-black bg-[#ccff00] px-4 py-3 transition-colors hover:bg-black hover:text-white"
+                >
+                  Open PDF <ArrowRight size={18} strokeWidth={3} />
+                </a>
+              </div>
             </div>
 
-            <iframe
-              src="/OneWeb_Partnership_Overview.pdf#view=FitH"
-              title="OneWeb Partnership Overview"
-              className="h-[68vh] min-h-[560px] w-full bg-[#dcecff] md:h-[82vh]"
-            />
+            <div className="mt-7 space-y-10 bg-[#dcecff] p-3 md:p-7">
+              <figure id="partnership-page-1" className="scroll-mt-28">
+                <figcaption className="mb-3 font-mono text-xs font-black uppercase tracking-[0.15em]">Page 01 / 02</figcaption>
+                <img
+                  src="/partnership-overview-page-1.png"
+                  alt="Page one of the OneWeb partnership overview"
+                  className="mx-auto block h-auto w-full border-[2px] border-black bg-white"
+                />
+              </figure>
+
+              <figure id="partnership-page-2" className="scroll-mt-28">
+                <figcaption className="mb-3 font-mono text-xs font-black uppercase tracking-[0.15em]">Page 02 / 02</figcaption>
+                <img
+                  src="/partnership-overview-page-2.png"
+                  alt="Page two of the OneWeb partnership overview"
+                  loading="lazy"
+                  className="mx-auto block h-auto w-full border-[2px] border-black bg-white"
+                />
+              </figure>
+            </div>
           </section>
 
           <section className="mt-10 flex flex-col items-start justify-between gap-8 border-[3px] border-black bg-[#ccff00] p-7 md:flex-row md:items-center md:p-10">
