@@ -4,10 +4,19 @@ import { Search, ChevronDown, X, ArrowRight, Globe, Activity } from 'lucide-reac
 const partnershipFormUrl = 'https://forms.gle/Db1hspzAnLF1UPjo7';
 
 function PartnershipsPage() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const updateNavigation = () => setIsScrolled(window.scrollY > 80);
+    updateNavigation();
+    window.addEventListener('scroll', updateNavigation, { passive: true });
+    return () => window.removeEventListener('scroll', updateNavigation);
+  }, []);
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#3083FD] text-black">
       <div
-        className="fixed inset-0 z-0 pointer-events-none opacity-30 mix-blend-multiply"
+        className="fixed inset-0 z-0 pointer-events-none opacity-40 mix-blend-multiply"
         style={{
           backgroundImage: 'url("https://images.unsplash.com/photo-1603484477859-abe6a73f9366?auto=format&fit=crop&w=2000&q=80")',
           backgroundPosition: 'center',
@@ -16,30 +25,72 @@ function PartnershipsPage() {
       />
 
       <div className="relative z-10">
-        <nav className="flex items-center justify-between gap-6 px-6 py-6 md:px-12 lg:px-[65px]">
-          <a href="/" className="flex items-center gap-3 transition-transform hover:scale-105" aria-label="OneWeb home">
-            <img src="/logoimage.png" alt="" className="h-14 w-14 object-contain" />
-            <span className="font-['Anton'] text-[2rem] uppercase leading-none tracking-tight">OneWeb</span>
+        {isScrolled && <div className="h-[120px] md:h-[147px]" aria-hidden="true" />}
+        <nav
+          className={`grid grid-cols-[auto_1fr_auto] transition-all duration-300 ${
+            isScrolled
+              ? 'fixed inset-x-0 top-0 z-[100] items-center bg-[#3083FD] px-8 py-3 shadow-[0_5px_0_rgba(0,0,0,0.16)] md:px-[65px]'
+              : 'relative items-start px-8 py-8 md:px-[65px] md:py-[45px]'
+          }`}
+        >
+          <a href="/" className="z-50 flex items-center transition-transform hover:scale-105" aria-label="OneWeb home">
+            {isScrolled ? (
+              <img src="/logoimage.png" alt="OneWeb" className="h-14 w-14 object-contain" />
+            ) : (
+              <div className="flex flex-col items-start gap-1 font-['Anton'] text-[2.2rem] uppercase leading-[0.85] tracking-tight text-black">
+                <span>One</span>
+                <span>Web</span>
+              </div>
+            )}
           </a>
 
-          <div className="flex items-center gap-5 font-mono text-sm font-bold md:gap-8 md:text-base">
-            <a href="/" className="nav-draw-underline hidden pb-1 sm:inline-flex">Home</a>
+          <div className="hidden lg:flex items-center justify-end space-x-12 font-mono text-[17px] font-bold mt-[10px] pr-6">
+            <div className="nav-work-group group relative">
+              <a href="/#our-work" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
+                <span className="nav-draw-underline">Our Work</span>
+                <ChevronDown
+                  size={16}
+                  strokeWidth={2.5}
+                  className="transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
+                  aria-hidden="true"
+                />
+              </a>
+
+              <div className="nav-work-menu absolute left-1/2 top-full z-[120] w-[220px] -translate-x-1/2 pt-3">
+                <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                  <a href="https://swypeai.tech" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Swype AI</a>
+                  <a href="https://trycora.app" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Cora</a>
+                  <a href="https://atlas.oneweb.social" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
+                </div>
+              </div>
+            </div>
+            <a href="/#impact" className="nav-draw-underline pb-1">Impact</a>
             <a
               href="https://swypeai.tech/about"
               target="_blank"
               rel="noreferrer"
-              className="nav-draw-underline hidden pb-1 sm:inline-flex"
+              className="nav-draw-underline pb-1"
             >
               About Us
             </a>
+            <a href="/partnerships" className="nav-draw-underline pb-1">Partnerships</a>
+            <button className="hover:opacity-70 ml-2" aria-label="Search">
+              <Search size={20} strokeWidth={2.5} />
+            </button>
+          </div>
+
+          <div className="hidden lg:flex items-center gap-4 relative mt-[2px]">
             <a
-              href={partnershipFormUrl}
+              href="https://forms.gle/styaEYuFpZqvTemg7"
               target="_blank"
               rel="noreferrer"
-              className="border-[2.5px] border-black bg-[#ccff00] px-4 py-3 transition-colors hover:bg-black hover:text-white md:px-6"
+              className="border-[2.5px] border-black w-[160px] h-[56px] flex items-center justify-center hover:bg-black hover:text-white transition-colors font-mono font-bold text-[15px]"
             >
               Join Us
             </a>
+            <button className="border-[2.5px] border-black w-[129px] h-[57px] bg-[#ff5a00] hover:bg-black hover:text-white transition-colors font-mono font-bold text-[17px] tracking-wide">
+              Donate
+            </button>
           </div>
         </nav>
 
