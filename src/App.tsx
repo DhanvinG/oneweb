@@ -60,10 +60,38 @@ export default function App() {
 
           {/* Desktop Links & Actions */}
           <div className="hidden lg:flex items-center justify-end space-x-12 font-mono text-[17px] font-bold mt-[10px] pr-6">
-            <a href="#our-work" className="hover:opacity-70">Our Work</a>
+            <div className="nav-work-group group relative">
+              <a
+                href="#our-work"
+                className="inline-flex items-center gap-1.5 pb-1"
+                aria-haspopup="true"
+              >
+                <span className="nav-draw-underline">Our Work</span>
+                <ChevronDown
+                  size={16}
+                  strokeWidth={2.5}
+                  className="transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
+                  aria-hidden="true"
+                />
+              </a>
+
+              <div className="nav-work-menu absolute left-1/2 top-full z-[120] w-[220px] -translate-x-1/2 pt-3">
+                <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                  <a href="https://swypeai.tech" className="nav-dropdown-link block py-2">
+                    Swype AI
+                  </a>
+                  <a href="https://trycora.app" className="nav-dropdown-link block py-2">
+                    Cora
+                  </a>
+                  <a href="https://atlas.oneweb.social" className="nav-dropdown-link block py-2">
+                    Atlas
+                  </a>
+                </div>
+              </div>
+            </div>
             <a
               href="#impact"
-              className="hover:opacity-70"
+              className="nav-draw-underline pb-1"
               onClick={(event) => {
                 event.preventDefault();
                 document.getElementById('impact')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -71,7 +99,7 @@ export default function App() {
             >
               Impact
             </a>
-            <a href="https://swypeai.tech/about" className="hover:opacity-70">About Us</a>
+            <a href="https://swypeai.tech/about" className="nav-draw-underline pb-1">About Us</a>
             
             <button className="hover:opacity-70 ml-2">
               <Search size={20} strokeWidth={2.5} />

@@ -108,3 +108,63 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+.nav-draw-underline {
+  position: relative;
+  display: inline-flex;
+  text-decoration: none;
+}
+
+.nav-draw-underline::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: #ff5a00;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-draw-underline:hover::after,
+.nav-draw-underline:focus-visible::after,
+.group:hover .nav-draw-underline::after,
+.group:focus-within .nav-draw-underline::after {
+  transform: scaleX(1);
+}
+
+.nav-dropdown-link {
+  position: relative;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.nav-work-menu {
+  visibility: hidden;
+  opacity: 0;
+  transform: translate(-50%, -4px);
+  transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
+}
+
+.nav-work-group:hover .nav-work-menu,
+.nav-work-group:focus-within .nav-work-menu {
+  visibility: visible;
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.nav-dropdown-link:hover,
+.nav-dropdown-link:focus-visible {
+  color: #ff5a00;
+  transform: translateX(4px);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-draw-underline::after,
+  .nav-work-menu,
+  .nav-dropdown-link {
+    transition: none;
+  }
+}
