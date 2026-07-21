@@ -707,37 +707,40 @@ export default function App() {
               </div>
             </div>
 
-            <article className="mt-16 grid overflow-hidden border-[3px] border-black bg-[#3083FD] shadow-[8px_8px_0_#000] md:grid-cols-[1.15fr_0.85fr]">
-              <div className="flex flex-col items-start p-8 text-black sm:p-10 md:p-12">
-                <p className="mb-5 font-mono text-xs font-black uppercase tracking-[0.14em] text-white">
-                  Interactive Resource
-                </p>
-                <h4 className="max-w-[700px] font-['Anton'] text-[3.5rem] uppercase leading-[0.88] tracking-[-0.025em] sm:text-[4.5rem] md:text-[5.5rem]">
-                  Explore the OneWeb Atlas
-                </h4>
-                <p className="mt-7 max-w-[650px] text-lg font-semibold leading-relaxed md:text-xl">
-                  Explore digital accessibility policies, standards, and documented authorities across all 50 states.
-                </p>
+            <div className="mt-16">
+              <div className="mb-7 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <p className="mb-3 font-mono text-xs font-black uppercase tracking-[0.14em] text-[#ff5a00]">
+                    Interactive Resource
+                  </p>
+                  <h4 className="font-['Anton'] text-[2.5rem] uppercase leading-none tracking-[-0.02em] md:text-[3.25rem]">
+                    Explore the OneWeb Atlas
+                  </h4>
+                  <p id="atlas-embed-description" className="mt-4 max-w-[760px] text-base font-semibold leading-relaxed text-black/70">
+                    Browse digital accessibility policies, standards, and documented authorities across all 50 states.
+                  </p>
+                </div>
                 <a
                   href="https://atlas.oneweb.social/"
                   target="_blank"
                   rel="noreferrer"
-                  className="group mt-9 inline-flex items-center gap-4 border-[3px] border-black bg-[#ccff00] px-6 py-4 font-mono text-sm font-black uppercase transition-colors hover:bg-black hover:text-white"
+                  className="group inline-flex w-fit shrink-0 items-center gap-3 border-b-2 border-black pb-1 font-mono text-sm font-black uppercase transition-colors hover:text-[#ff5a00]"
                 >
-                  Explore Atlas
-                  <ArrowRight className="transition-transform group-hover:translate-x-1" size={20} strokeWidth={3} />
+                  Open Atlas in a new tab
+                  <ArrowRight className="transition-transform group-hover:translate-x-1" size={18} strokeWidth={3} />
                 </a>
               </div>
-
-              <div className="relative flex min-h-[300px] items-center justify-center overflow-hidden border-t-[3px] border-black bg-[#ccff00] p-10 md:min-h-full md:border-l-[3px] md:border-t-0" aria-hidden="true">
-                <Globe className="absolute -right-12 -top-12 h-[260px] w-[260px] text-black/15 md:h-[340px] md:w-[340px]" strokeWidth={1.1} />
-                <div className="relative z-10 text-center">
-                  <span className="block font-['Anton'] text-[9rem] leading-[0.75] tracking-[-0.05em] md:text-[11rem]">50</span>
-                  <span className="mt-6 block font-mono text-sm font-black uppercase tracking-[0.14em]">State accessibility profiles</span>
-                  <span className="mt-7 block border-y-2 border-black py-3 font-mono text-xs font-black uppercase tracking-[0.12em]">Browse · Compare · Learn</span>
-                </div>
+              <div className="overflow-hidden border-[3px] border-black bg-white shadow-[8px_8px_0_#000]">
+                <iframe
+                  src="https://atlas.oneweb.social/"
+                  title="Interactive OneWeb Atlas digital accessibility policy map"
+                  aria-describedby="atlas-embed-description"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  className="block h-[620px] w-full border-0 md:h-[760px]"
+                />
               </div>
-            </article>
+            </div>
 
             <div className="mt-16">
               <h4 className="font-['Anton'] text-[2.5rem] uppercase tracking-[-0.02em] md:text-[3.25rem]">
