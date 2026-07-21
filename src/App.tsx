@@ -724,10 +724,12 @@ export default function App() {
                   href="https://atlas.oneweb.social/"
                   target="_blank"
                   rel="noreferrer"
-                  className="group inline-flex w-fit shrink-0 items-center gap-3 border-b-2 border-black pb-1 font-mono text-sm font-black uppercase transition-colors hover:text-[#ff5a00]"
+                  className="group inline-flex w-fit shrink-0 items-center gap-4 border-[3px] border-black bg-[#ccff00] px-5 py-3.5 font-mono text-sm font-black uppercase tracking-[0.04em] transition-colors hover:bg-black hover:text-white"
                 >
-                  Open Atlas in a new tab
-                  <ArrowRight className="transition-transform group-hover:translate-x-1" size={18} strokeWidth={3} />
+                  Open Full Atlas
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black text-[#ccff00] transition-all group-hover:translate-x-1 group-hover:bg-[#ff5a00] group-hover:text-black">
+                    <ArrowRight size={17} strokeWidth={3} />
+                  </span>
                 </a>
               </div>
               <div className="overflow-hidden border-[3px] border-black bg-white shadow-[8px_8px_0_#000]">
