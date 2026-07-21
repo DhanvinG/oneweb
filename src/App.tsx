@@ -77,13 +77,13 @@ export default function App() {
 
               <div className="nav-work-menu absolute left-1/2 top-full z-[120] w-[220px] -translate-x-1/2 pt-3">
                 <div className="border-2 border-black bg-black px-6 py-5 text-white">
-                  <a href="https://swypeai.tech" className="nav-dropdown-link block py-2">
+                  <a href="https://swypeai.tech" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">
                     Swype AI
                   </a>
-                  <a href="https://trycora.app" className="nav-dropdown-link block py-2">
+                  <a href="https://trycora.app" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">
                     Cora
                   </a>
-                  <a href="https://atlas.oneweb.social" className="nav-dropdown-link block py-2">
+                  <a href="https://atlas.oneweb.social" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">
                     Atlas
                   </a>
                 </div>
