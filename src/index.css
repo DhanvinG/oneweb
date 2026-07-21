@@ -125,7 +125,7 @@ html {
   background: #ff5a00;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .nav-draw-underline:hover::after,
