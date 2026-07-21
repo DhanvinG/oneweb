@@ -1,6 +1,119 @@
 import React, { useEffect, useState } from 'react';
 import { Search, ChevronDown, X, ArrowRight, Globe, Activity } from 'lucide-react';
 
+const partnershipFormUrl = 'https://forms.gle/Db1hspzAnLF1UPjo7';
+
+function PartnershipsPage() {
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-[#3083FD] text-black">
+      <div
+        className="fixed inset-0 z-0 pointer-events-none opacity-30 mix-blend-multiply"
+        style={{
+          backgroundImage: 'url("https://images.unsplash.com/photo-1603484477859-abe6a73f9366?auto=format&fit=crop&w=2000&q=80")',
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+        }}
+      />
+
+      <div className="relative z-10">
+        <nav className="flex items-center justify-between gap-6 px-6 py-6 md:px-12 lg:px-[65px]">
+          <a href="/" className="flex items-center gap-3 transition-transform hover:scale-105" aria-label="OneWeb home">
+            <img src="/logoimage.png" alt="" className="h-14 w-14 object-contain" />
+            <span className="font-['Anton'] text-[2rem] uppercase leading-none tracking-tight">OneWeb</span>
+          </a>
+
+          <div className="flex items-center gap-5 font-mono text-sm font-bold md:gap-8 md:text-base">
+            <a href="/" className="nav-draw-underline hidden pb-1 sm:inline-flex">Home</a>
+            <a
+              href="https://swypeai.tech/about"
+              target="_blank"
+              rel="noreferrer"
+              className="nav-draw-underline hidden pb-1 sm:inline-flex"
+            >
+              About Us
+            </a>
+            <a
+              href={partnershipFormUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="border-[2.5px] border-black bg-[#ccff00] px-4 py-3 transition-colors hover:bg-black hover:text-white md:px-6"
+            >
+              Join Us
+            </a>
+          </div>
+        </nav>
+
+        <main className="mx-auto max-w-[1500px] px-5 pb-16 pt-8 md:px-10 md:pb-24 md:pt-14">
+          <header className="grid items-end gap-7 lg:grid-cols-[1fr_auto]">
+            <div>
+              <p className="mb-4 font-mono text-sm font-black uppercase tracking-[0.16em] text-[#ff5a00]">
+                Partner with the movement
+              </p>
+              <h1 className="max-w-[1050px] font-['Anton'] text-[4.2rem] uppercase leading-[0.88] tracking-[-0.025em] sm:text-[6rem] lg:text-[8rem]">
+                Partnerships
+              </h1>
+              <p className="mt-7 max-w-[780px] text-lg font-medium leading-relaxed md:text-xl">
+                Explore how your organization can help OneWeb raise awareness and advance digital accessibility.
+              </p>
+            </div>
+
+            <a
+              href={partnershipFormUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex w-fit items-center gap-5 border-[3px] border-black bg-[#ccff00] px-7 py-5 font-mono font-black uppercase transition-colors hover:bg-black hover:text-white"
+            >
+              Open the form <ArrowRight size={21} strokeWidth={3} />
+            </a>
+          </header>
+
+          <section className="mt-12 border-[3px] border-black bg-white p-3 md:mt-16 md:p-5">
+            <div className="mb-3 flex flex-col gap-3 border-b-[3px] border-black px-2 pb-4 sm:flex-row sm:items-center sm:justify-between md:px-3">
+              <div>
+                <p className="font-mono text-xs font-black uppercase tracking-[0.15em] text-[#ff5a00]">Partnership overview</p>
+                <h2 className="mt-1 text-xl font-black uppercase tracking-[-0.025em] md:text-2xl">Learn how to participate</h2>
+              </div>
+              <a
+                href="/OneWeb_Partnership_Overview.pdf"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-fit items-center gap-2 border-b-2 border-black pb-1 font-mono text-sm font-black uppercase"
+              >
+                Open PDF <ArrowRight size={18} strokeWidth={3} />
+              </a>
+            </div>
+
+            <iframe
+              src="/OneWeb_Partnership_Overview.pdf#view=FitH"
+              title="OneWeb Partnership Overview"
+              className="h-[68vh] min-h-[560px] w-full bg-[#dcecff] md:h-[82vh]"
+            />
+          </section>
+
+          <section className="mt-10 flex flex-col items-start justify-between gap-8 border-[3px] border-black bg-[#ccff00] p-7 md:flex-row md:items-center md:p-10">
+            <div>
+              <p className="font-mono text-xs font-black uppercase tracking-[0.15em] text-[#ff5a00]">Ready to collaborate?</p>
+              <h2 className="mt-3 font-['Anton'] text-[2.8rem] uppercase leading-none md:text-[4rem]">Become a OneWeb partner</h2>
+            </div>
+            <a
+              href={partnershipFormUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex shrink-0 items-center gap-5 border-[3px] border-black bg-black px-7 py-5 font-mono font-black uppercase text-white transition-colors hover:bg-[#ff5a00] hover:text-black"
+            >
+              Go to the form <ArrowRight size={21} strokeWidth={3} />
+            </a>
+          </section>
+        </main>
+
+        <footer className="border-b border-white/20 bg-black px-6 py-8 text-white">
+          <p className="text-center text-sm font-medium md:text-base">© {new Date().getFullYear()} OneWeb. All rights reserved.</p>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [showBanner, setShowBanner] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -11,6 +124,10 @@ export default function App() {
     window.addEventListener('scroll', updateNavigation, { passive: true });
     return () => window.removeEventListener('scroll', updateNavigation);
   }, []);
+
+  if (window.location.pathname.replace(/\/+$/, '') === '/partnerships') {
+    return <PartnershipsPage />;
+  }
 
   return (
     <div className="w-full font-sans overflow-x-hidden">
@@ -99,7 +216,8 @@ export default function App() {
             >
               Impact
             </a>
-            <a href="https://swypeai.tech/about" className="nav-draw-underline pb-1">About Us</a>
+            <a href="https://swypeai.tech/about" target="_blank" rel="noreferrer" className="nav-draw-underline pb-1">About Us</a>
+            <a href="/partnerships" className="nav-draw-underline pb-1">Partnerships</a>
             
             <button className="hover:opacity-70 ml-2">
               <Search size={20} strokeWidth={2.5} />
