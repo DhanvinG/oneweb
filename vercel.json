@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/partner-kit",
+      "destination": "/OneWeb_Partnership_Overview.pdf"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
