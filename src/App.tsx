@@ -1,7 +1,507 @@
 import React, { useEffect, useState } from 'react';
-import { Search, ChevronDown, X, ArrowRight, Globe, Activity } from 'lucide-react';
+import { Search, ChevronDown, X, ArrowRight, ArrowLeft, Globe, Activity } from 'lucide-react';
 
 const partnershipFormUrl = 'https://forms.gle/Db1hspzAnLF1UPjo7';
+const accessibilityGuideFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScNFpSDR5JRR5_elJldui6giG34PfRMZvvzag5_0ZHJEkMZfQ/viewform?usp=publish-editor';
+const accessibilityQuickStartUrl = '/OneWeb_Five_Simple_Accessibility_Checks_Accessible.pdf';
+const accessibilityGuidePreviewPages = [
+  '/digital-accessibility-guide-cover.png',
+  '/digital-accessibility-guide-first-page.png',
+  '/digital-accessibility-guide-page-3.png',
+  '/digital-accessibility-guide-page-4.png',
+  '/digital-accessibility-guide-page-5.png',
+];
+
+function AccessibilityGuideHero() {
+  const [isBookOpen, setIsBookOpen] = useState(false);
+  const [previewSpread, setPreviewSpread] = useState(0);
+  const [pageTurn, setPageTurn] = useState<null | {
+    from: number;
+    to: number;
+    direction: 'next' | 'previous';
+    settled?: boolean;
+  }>(null);
+  const finalPreviewSpread = Math.ceil(accessibilityGuidePreviewPages.length / 2);
+  const previewSpreadCount = finalPreviewSpread + 1;
+
+  useEffect(() => {
+    if (!isBookOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const handleReaderKeys = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsBookOpen(false);
+      if (pageTurn) return;
+      if (event.key === 'ArrowLeft' && previewSpread > 0) {
+        if (previewSpread === finalPreviewSpread) {
+          setPreviewSpread(finalPreviewSpread - 1);
+        } else {
+          setPageTurn({ from: previewSpread, to: previewSpread - 1, direction: 'previous' });
+        }
+      }
+      if (event.key === 'ArrowRight' && previewSpread < previewSpreadCount - 1) {
+        if (previewSpread === finalPreviewSpread - 1) {
+          setPreviewSpread(finalPreviewSpread);
+        } else {
+          setPageTurn({ from: previewSpread, to: previewSpread + 1, direction: 'next' });
+        }
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleReaderKeys);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleReaderKeys);
+    };
+  }, [finalPreviewSpread, isBookOpen, pageTurn, previewSpread, previewSpreadCount]);
+
+  const startPageTurn = (direction: 'next' | 'previous') => {
+    if (pageTurn) return;
+
+    const target = direction === 'next' ? previewSpread + 1 : previewSpread - 1;
+    if (target < 0 || target >= previewSpreadCount) return;
+
+    if (
+      (direction === 'next' && previewSpread === finalPreviewSpread - 1) ||
+      (direction === 'previous' && previewSpread === finalPreviewSpread)
+    ) {
+      setPreviewSpread(target);
+      return;
+    }
+
+    setPageTurn({ from: previewSpread, to: target, direction });
+  };
+
+  const finishPageTurn = () => {
+    if (!pageTurn || pageTurn.settled) return;
+
+    setPreviewSpread(pageTurn.to);
+    setPageTurn({ ...pageTurn, settled: true });
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setPageTurn((current) => current?.settled ? null : current);
+      });
+    });
+  };
+
+  const spreadPages = (spread: number): [number | null, number | null] => {
+    if (spread === 0 || spread === finalPreviewSpread) return [null, null];
+    return [1 + (spread - 1) * 2, 2 + (spread - 1) * 2];
+  };
+
+  const getTurnLayout = () => {
+    if (!pageTurn) {
+      const [left, right] = spreadPages(previewSpread);
+      return { left, right, front: null, back: null };
+    }
+
+    const fromPages = spreadPages(pageTurn.from);
+    const toPages = spreadPages(pageTurn.to);
+
+    if (pageTurn.direction === 'next') {
+      return {
+        left: pageTurn.settled ? toPages[0] : fromPages[0],
+        right: toPages[1],
+        front: pageTurn.from === 0 ? 0 : fromPages[1],
+        back: toPages[0],
+      };
+    }
+
+    return {
+      left: toPages[0],
+      right: pageTurn.settled ? toPages[1] : fromPages[1],
+      front: fromPages[0],
+      back: pageTurn.to === 0 ? 0 : toPages[1],
+    };
+  };
+
+  const turnLayout = getTurnLayout();
+  const previewPageLabel = previewSpread === 0
+    ? 'Front cover · Click to open'
+    : previewSpread === finalPreviewSpread
+      ? ''
+      : `Pages ${2 + (previewSpread - 1) * 2}–${Math.min(3 + (previewSpread - 1) * 2, 5)} of 5`;
+
+  return (
+    <>
+    <section
+      aria-labelledby="accessibility-guide-title"
+      className="relative z-20 isolate overflow-hidden border-b-[3px] border-black bg-[#10182f] text-white"
+    >
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div className="absolute -right-20 -top-28 h-80 w-80 rounded-full bg-[#3083FD]/40 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto grid min-h-[calc(100vh-110px)] max-w-[1600px] items-center gap-10 px-6 py-12 md:px-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16 lg:px-16">
+        <div className="flex h-full w-full max-w-[620px] flex-col items-center justify-center gap-7 justify-self-center text-center">
+          <h1
+            id="accessibility-guide-title"
+            className="text-[clamp(1.2rem,6vw,2.25rem)] font-black leading-snug tracking-[-0.03em] text-white"
+          >
+            <span className="block whitespace-nowrap">Practical steps to</span>
+            <span className="block whitespace-nowrap">make your website easier</span>
+            <span className="block whitespace-nowrap">for everyone to use.</span>
+          </h1>
+          <a
+            href={accessibilityGuideFormUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-14 items-center justify-center border-[3px] border-black bg-[#ff5a00] px-7 font-mono text-sm font-black uppercase text-black transition-transform hover:-translate-y-1 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#ccff00]"
+          >
+            Read the full guide
+          </a>
+        </div>
+
+        <div className="relative mx-auto w-full max-w-[820px] pb-4 md:justify-self-end">
+          <button
+            type="button"
+            className="guide-book-trigger"
+            onClick={() => {
+              setPreviewSpread(0);
+              setPageTurn(null);
+              setIsBookOpen(true);
+            }}
+            aria-label="Open a preview of the Digital Accessibility guide"
+          >
+            <div className="guide-book-scene">
+            <div className="guide-book">
+              <div className="guide-book-pages" aria-hidden="true" />
+              <div className="guide-book-spine" aria-hidden="true">
+                <span>OneWeb · Digital Accessibility in Practice</span>
+              </div>
+              <div className="guide-book-cover">
+                <img
+                  src="/digital-accessibility-guide-cover.png"
+                  alt="Cover of OneWeb's Digital Accessibility in Practice guide"
+                  className="block h-auto w-full"
+                />
+                <div className="guide-book-shine" aria-hidden="true" />
+              </div>
+              <div className="guide-preview-sticker" aria-hidden="true">
+                <span>Click to</span>
+                <strong>Preview</strong>
+              </div>
+            </div>
+            <div className="guide-book-shadow" aria-hidden="true" />
+          </div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    {isBookOpen && (
+      <div className="guide-reader-overlay guide-reader-overlay-fullscreen">
+        <div
+          className="guide-reader-dialog guide-reader-dialog-fullscreen"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Digital Accessibility guide preview"
+        >
+          <button
+            type="button"
+            className="guide-reader-close guide-reader-close-corner"
+            onClick={() => setIsBookOpen(false)}
+            aria-label="Close guide preview"
+            autoFocus
+          >
+            <X size={26} strokeWidth={3} aria-hidden="true" />
+          </button>
+
+          <div className="guide-reader-book-stage">
+            <p className="guide-reader-page-info" aria-live="polite">
+              {previewPageLabel}
+            </p>
+
+            <button
+              type="button"
+              className="guide-reader-side-arrow guide-reader-side-arrow-left"
+              onClick={() => startPageTurn('previous')}
+              disabled={previewSpread === 0 || Boolean(pageTurn)}
+              aria-label="Go to previous pages"
+            >
+              <ArrowLeft size={34} strokeWidth={3} aria-hidden="true" />
+            </button>
+
+            <div className="guide-reader-book-viewport">
+              {previewSpread === finalPreviewSpread && !pageTurn ? (
+                <div className="guide-preview-learn-more">
+                  <h3>Keep learning.</h3>
+                  <a href={accessibilityGuideFormUrl} target="_blank" rel="noreferrer">
+                    Read the full guide
+                  </a>
+                </div>
+              ) : previewSpread === 0 && !pageTurn ? (
+              <button
+                type="button"
+                className="guide-preview-cover-only guide-cover-arriving"
+                onClick={() => startPageTurn('next')}
+                aria-label="Open the guide cover and preview pages 2 and 3"
+              >
+                <img src={accessibilityGuidePreviewPages[0]} alt="Digital Accessibility guide front cover" />
+              </button>
+            ) : (
+              <div
+                className={`guide-preview-book ${
+                  pageTurn?.from === 0
+                    ? 'guide-preview-book-opening'
+                    : pageTurn?.to === 0
+                      ? 'guide-preview-book-closing'
+                      : ''
+                }`}
+                aria-live="polite"
+              >
+                {(['left', 'right'] as const).map((position) => {
+                  const pageIndex = turnLayout[position];
+                  return (
+                    <div key={position} className={`guide-preview-page guide-preview-page-${position}`}>
+                      {pageIndex === null ? (
+                        <div className="guide-preview-page-blank" aria-hidden="true" />
+                      ) : (
+                        <>
+                          <img
+                            src={accessibilityGuidePreviewPages[pageIndex]}
+                            alt={`Digital Accessibility guide, page ${pageIndex + 1} of 5`}
+                          />
+                          <span className="guide-preview-page-number">{pageIndex + 1}</span>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {pageTurn && turnLayout.front !== null && turnLayout.back !== null && (
+                  <div
+                    className={`guide-turning-sheet guide-turning-sheet-${pageTurn.direction}`}
+                    onAnimationEnd={finishPageTurn}
+                    aria-hidden="true"
+                  >
+                    <div className="guide-turning-sheet-face guide-turning-sheet-front">
+                      <img src={accessibilityGuidePreviewPages[turnLayout.front]} alt="" />
+                      {turnLayout.front > 0 && (
+                        <span className="guide-preview-page-number">{turnLayout.front + 1}</span>
+                      )}
+                    </div>
+                    <div className="guide-turning-sheet-face guide-turning-sheet-back">
+                      <img src={accessibilityGuidePreviewPages[turnLayout.back]} alt="" />
+                      {turnLayout.back > 0 && (
+                        <span className="guide-preview-page-number">{turnLayout.back + 1}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="guide-reader-side-arrow guide-reader-side-arrow-right"
+              onClick={() => startPageTurn('next')}
+              disabled={previewSpread === previewSpreadCount - 1 || Boolean(pageTurn)}
+              aria-label="Go to next pages"
+            >
+              <ArrowRight size={34} strokeWidth={3} aria-hidden="true" />
+            </button>
+          </div>
+
+          <footer className="hidden" aria-hidden="true">
+            <button
+              type="button"
+              className="guide-reader-page-button"
+              onClick={() => startPageTurn('previous')}
+              disabled={previewSpread === 0 || Boolean(pageTurn)}
+            >
+              <ArrowLeft size={20} strokeWidth={3} aria-hidden="true" /> Previous
+            </button>
+            <p className="font-mono text-xs font-black uppercase tracking-[0.1em]">
+              {previewSpread === 0
+                ? 'Front cover · Click to open'
+                : `Pages ${2 + (previewSpread - 1) * 2}–${Math.min(3 + (previewSpread - 1) * 2, 5)} of 5`}
+            </p>
+            <button
+              type="button"
+              className="guide-reader-page-button"
+              onClick={() => startPageTurn('next')}
+              disabled={previewSpread === previewSpreadCount - 1 || Boolean(pageTurn)}
+            >
+              Next <ArrowRight size={20} strokeWidth={3} aria-hidden="true" />
+            </button>
+            <a
+              href={accessibilityGuideFormUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="guide-reader-mobile-link"
+            >
+              Read full guide <ArrowRight size={18} strokeWidth={3} aria-hidden="true" />
+            </a>
+          </footer>
+        </div>
+      </div>
+    )}
+    </>
+  );
+}
+
+function AccessibilityQuickStartSection() {
+  return (
+    <section id="quick-start" className="relative z-20 border-b-[3px] border-black bg-[#dcecff] px-6 py-16 text-[#10182f] md:px-12 md:py-24">
+      <div className="mx-auto grid max-w-[1300px] items-center gap-12 md:grid-cols-[0.72fr_1.28fr] md:gap-16">
+        <div className="mx-auto w-full max-w-[390px]">
+          <img
+            src="/five-simple-accessibility-checks-cover.png"
+            alt="Cover of Digital Accessibility: Five Simple Checks for Any Website"
+            className="block w-full border-[3px] border-black shadow-[10px_10px_0_#ff1438]"
+          />
+        </div>
+
+        <div className="max-w-[690px]">
+          <p className="mb-4 font-mono text-sm font-black uppercase tracking-[0.16em] text-[#ff5a00]">Quick Start · 4 pages</p>
+          <h2 className="font-['Anton'] text-[clamp(2rem,8vw,4.75rem)] uppercase leading-[0.98] tracking-[-0.015em] text-[#10182f]">
+            <span className="block sm:whitespace-nowrap">Five Accessibility</span>
+            <span className="block sm:whitespace-nowrap">Essentials</span>
+          </h2>
+          <p className="mt-7 max-w-[620px] text-lg font-semibold leading-relaxed md:text-xl">
+            Check your website in ten minutes with five simple accessibility checks: color contrast, alternative text, captions, keyboard access, and clear form labels.
+          </p>
+          <a
+            href={accessibilityQuickStartUrl}
+            download
+            className="mt-8 inline-flex min-h-14 items-center justify-center border-[3px] border-black bg-[#ff5a00] px-6 font-mono text-sm font-black uppercase text-black transition-colors hover:bg-black hover:text-white focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#3083fd]"
+          >
+            Download the 4-page checklist
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+type ResourcePage = 'guide' | 'checks' | 'flyers';
+
+function StaticSiteHeader({ activeResource }: { activeResource?: ResourcePage }) {
+  return (
+    <header className="relative z-[150] bg-[#3083FD] text-black">
+      <nav className="grid h-[104px] grid-cols-[auto_1fr_auto] items-center px-8 md:px-[80px]">
+        <a href="/" className="z-50 flex items-center" aria-label="OneWeb home">
+          <img src="/logoimage.png" alt="OneWeb" className="h-[70px] w-[70px] object-contain" />
+        </a>
+
+        <div className="hidden items-center justify-end gap-8 pr-7 font-mono text-[16px] font-bold lg:flex">
+          <div className="nav-work-group group relative">
+            <a href="/#our-work" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
+              <span className="nav-draw-underline">Our Work</span>
+              <ChevronDown size={16} strokeWidth={2.5} className="transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" aria-hidden="true" />
+            </a>
+            <div className="nav-work-menu absolute left-1/2 top-full z-[170] w-[220px] -translate-x-1/2 pt-3">
+              <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                <a href="https://swypeai.tech" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Swype AI</a>
+                <a href="https://trycora.app" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Cora</a>
+                <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
+              </div>
+            </div>
+          </div>
+
+          <a href="/#impact" className="nav-draw-underline pb-1">Impact</a>
+
+          <div className="nav-work-group group relative">
+            <button type="button" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
+              <span className="nav-draw-underline">Resources</span>
+              <ChevronDown size={16} strokeWidth={2.5} className="transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" aria-hidden="true" />
+            </button>
+            <div className="nav-work-menu absolute left-1/2 top-full z-[170] w-[330px] -translate-x-1/2 pt-3">
+              <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                <a href="/digital-accessibility-guide" className="nav-dropdown-link block py-2" aria-current={activeResource === 'guide' ? 'page' : undefined}>Digital Accessibility Guide</a>
+                <a href="/five-accessibility-essentials" className="nav-dropdown-link block py-2" aria-current={activeResource === 'checks' ? 'page' : undefined}>Five Accessibility Essentials</a>
+                <a href="/flyers" className="nav-dropdown-link block py-2" aria-current={activeResource === 'flyers' ? 'page' : undefined}>Flyers</a>
+              </div>
+            </div>
+          </div>
+
+          <a href="https://swypeai.tech/about" target="_blank" rel="noreferrer" className="nav-draw-underline pb-1">About Us</a>
+          <a href="/partnerships" className="nav-draw-underline pb-1">Partnerships</a>
+          <button className="ml-1 hover:opacity-70" aria-label="Search"><Search size={20} strokeWidth={2.5} /></button>
+        </div>
+
+        <div className="relative hidden items-center gap-4 lg:flex">
+          <a href="https://forms.gle/styaEYuFpZqvTemg7" target="_blank" rel="noreferrer" className="flex h-[64px] w-[150px] items-center justify-center border-[2.5px] border-black font-mono text-[16px] font-bold transition-colors hover:bg-black hover:text-white">Join Us</a>
+          <button className="h-[64px] w-[140px] border-[2.5px] border-black bg-[#ff5a00] font-mono text-[16px] font-bold tracking-wide transition-colors hover:bg-black hover:text-white">Donate</button>
+        </div>
+      </nav>
+    </header>
+  );
+}
+
+function AccessibilityGuidePage() {
+  return (
+    <div className="min-h-screen bg-[#10182f]">
+      <StaticSiteHeader activeResource="guide" />
+
+      <main>
+        <AccessibilityGuideHero />
+      </main>
+
+      <footer className="border-t-[3px] border-black bg-black px-6 py-7 text-center text-sm font-medium text-white">
+        © {new Date().getFullYear()} OneWeb. All rights reserved.
+      </footer>
+    </div>
+  );
+}
+
+function FiveSimpleChecksPage() {
+  return (
+    <div className="min-h-screen bg-[#dcecff]">
+      <StaticSiteHeader activeResource="checks" />
+      <main>
+        <AccessibilityQuickStartSection />
+      </main>
+      <footer className="border-t-[3px] border-black bg-black px-6 py-7 text-center text-sm font-medium text-white">
+        © {new Date().getFullYear()} OneWeb. All rights reserved.
+      </footer>
+    </div>
+  );
+}
+
+function FlyersPage() {
+  const flyers = [
+    { number: 1, title: 'What Is Digital Accessibility?' },
+    { number: 2, title: 'Why It Matters' },
+    { number: 3, title: 'Common Accessibility Barriers' },
+    { number: 4, title: 'Help Create #OneWeb' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#dcecff] text-[#10182f]">
+      <StaticSiteHeader activeResource="flyers" />
+      <main className="px-6 py-14 md:px-12 md:py-20">
+        <div className="mx-auto max-w-[1200px]">
+          <p className="font-mono text-sm font-black uppercase tracking-[0.16em] text-[#ff5a00]">Free Resources</p>
+          <h1 className="mt-4 font-['Anton'] text-[clamp(3.25rem,6.3vw,5.1rem)] uppercase leading-[0.94] tracking-[-0.015em] lg:whitespace-nowrap">Digital Accessibility Flyers</h1>
+          <p className="mt-6 text-lg font-semibold leading-relaxed md:whitespace-nowrap md:text-xl">Download and share these four flyers to help explain why digital accessibility matters.</p>
+
+          <div className="flyer-stack" role="list" aria-label="Downloadable digital accessibility flyers">
+            {flyers.map((flyer) => (
+              <a
+                key={flyer.number}
+                href={`/${flyer.number}.png`}
+                download
+                className="flyer-stack-card"
+                role="listitem"
+                aria-label={`Download ${flyer.title} flyer`}
+              >
+                <img src={`/${flyer.number}.png`} alt="" className="block h-auto w-full" aria-hidden="true" />
+              </a>
+            ))}
+          </div>
+          <p className="mt-1 text-center font-mono text-sm font-black uppercase tracking-[0.1em] text-[#ff5a00]">Select a flyer to download</p>
+        </div>
+      </main>
+      <footer className="border-t-[3px] border-black bg-black px-6 py-7 text-center text-sm font-medium text-white">
+        © {new Date().getFullYear()} OneWeb. All rights reserved.
+      </footer>
+    </div>
+  );
+}
 
 function PartnershipsPage() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -44,7 +544,7 @@ function PartnershipsPage() {
             )}
           </a>
 
-          <div className="hidden lg:flex items-center justify-end space-x-12 font-mono text-[17px] font-bold mt-[10px] pr-6">
+          <div className="hidden lg:flex items-center justify-end gap-8 font-mono text-[16px] font-bold mt-[10px] pr-6">
             <div className="nav-work-group group relative">
               <a href="/#our-work" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
                 <span className="nav-draw-underline">Our Work</span>
@@ -60,11 +560,24 @@ function PartnershipsPage() {
                 <div className="border-2 border-black bg-black px-6 py-5 text-white">
                   <a href="https://swypeai.tech" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Swype AI</a>
                   <a href="https://trycora.app" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Cora</a>
-                  <a href="https://atlas.oneweb.social" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
+                  <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
                 </div>
               </div>
             </div>
             <a href="/#impact" className="nav-draw-underline pb-1">Impact</a>
+            <div className="nav-work-group group relative">
+              <button type="button" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
+                <span className="nav-draw-underline">Resources</span>
+                <ChevronDown size={16} strokeWidth={2.5} className="transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" aria-hidden="true" />
+              </button>
+              <div className="nav-work-menu absolute left-1/2 top-full z-[120] w-[330px] -translate-x-1/2 pt-3">
+                <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                  <a href="/digital-accessibility-guide" className="nav-dropdown-link block py-2">Digital Accessibility Guide</a>
+                  <a href="/five-accessibility-essentials" className="nav-dropdown-link block py-2">Five Accessibility Essentials</a>
+                  <a href="/flyers" className="nav-dropdown-link block py-2">Flyers</a>
+                </div>
+              </div>
+            </div>
             <a
               href="https://swypeai.tech/about"
               target="_blank"
@@ -176,8 +689,22 @@ export default function App() {
     return () => window.removeEventListener('scroll', updateNavigation);
   }, []);
 
-  if (window.location.pathname.replace(/\/+$/, '') === '/partnerships') {
+  const currentPath = window.location.pathname.replace(/\/+$/, '');
+
+  if (currentPath === '/partnerships') {
     return <PartnershipsPage />;
+  }
+
+  if (currentPath === '/digital-accessibility-guide' || currentPath === '/accessibility-guide') {
+    return <AccessibilityGuidePage />;
+  }
+
+  if (currentPath === '/five-accessibility-essentials' || currentPath === '/five-simple-accessibility-checks') {
+    return <FiveSimpleChecksPage />;
+  }
+
+  if (currentPath === '/flyers') {
+    return <FlyersPage />;
   }
 
   return (
@@ -227,7 +754,7 @@ export default function App() {
           </a>
 
           {/* Desktop Links & Actions */}
-          <div className="hidden lg:flex items-center justify-end space-x-12 font-mono text-[17px] font-bold mt-[10px] pr-6">
+          <div className="hidden lg:flex items-center justify-end gap-8 font-mono text-[16px] font-bold mt-[10px] pr-6">
             <div className="nav-work-group group relative">
               <a
                 href="#our-work"
@@ -251,7 +778,7 @@ export default function App() {
                   <a href="https://trycora.app" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">
                     Cora
                   </a>
-                  <a href="https://atlas.oneweb.social" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">
+                  <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">
                     Atlas
                   </a>
                 </div>
@@ -267,6 +794,19 @@ export default function App() {
             >
               Impact
             </a>
+            <div className="nav-work-group group relative">
+              <button type="button" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
+                <span className="nav-draw-underline">Resources</span>
+                <ChevronDown size={16} strokeWidth={2.5} className="transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" aria-hidden="true" />
+              </button>
+              <div className="nav-work-menu absolute left-1/2 top-full z-[120] w-[330px] -translate-x-1/2 pt-3">
+                <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                  <a href="/digital-accessibility-guide" className="nav-dropdown-link block py-2">Digital Accessibility Guide</a>
+                  <a href="/five-accessibility-essentials" className="nav-dropdown-link block py-2">Five Accessibility Essentials</a>
+                  <a href="/flyers" className="nav-dropdown-link block py-2">Flyers</a>
+                </div>
+              </div>
+            </div>
             <a href="https://swypeai.tech/about" target="_blank" rel="noreferrer" className="nav-draw-underline pb-1">About Us</a>
             <a href="/partnerships" className="nav-draw-underline pb-1">Partnerships</a>
             
@@ -877,6 +1417,67 @@ export default function App() {
             </div>
 
             <div className="mt-16">
+              <p className="mb-3 font-mono text-xs font-black uppercase tracking-[0.14em] text-[#ff5a00]">
+                Practical Guides
+              </p>
+              <h4 className="font-['Anton'] text-[2.5rem] uppercase leading-none tracking-[-0.02em] md:text-[3.25rem]">
+                Accessibility Guides
+              </h4>
+              <p className="mt-4 max-w-[680px] text-base font-semibold leading-relaxed text-black/65">
+                Choose a quick ten-minute check or explore the complete practical handbook.
+              </p>
+              <div className="mt-8 grid gap-7 lg:grid-cols-2">
+                <a
+                  href="/digital-accessibility-guide"
+                  className="home-guide-card home-guide-card-blue group"
+                >
+                  <span className="home-guide-index" aria-hidden="true">01</span>
+                  <div className="home-guide-cover bg-[#3083fd]">
+                    <img
+                      src="/digital-accessibility-guide-cover.png"
+                      alt="Digital Accessibility Guide cover"
+                      className="block h-full w-full object-contain"
+                    />
+                  </div>
+                  <div className="home-guide-copy">
+                    <p className="font-mono text-xs font-black uppercase tracking-[0.12em] text-[#ff5a00]">Full handbook</p>
+                    <h5 className="home-guide-title">Digital Accessibility Guide</h5>
+                    <p className="mt-4 text-sm font-semibold leading-relaxed text-black/70">
+                      Practical steps for making websites easier for everyone to use.
+                    </p>
+                    <span className="home-guide-cta">
+                      <span className="home-guide-arrow"><ArrowRight size={20} strokeWidth={3} /></span>
+                    </span>
+                  </div>
+                </a>
+
+                <a
+                  href="/five-accessibility-essentials"
+                  className="home-guide-card home-guide-card-orange group"
+                >
+                  <span className="home-guide-index" aria-hidden="true">02</span>
+                  <div className="home-guide-cover bg-[#dcecff]">
+                    <img
+                      src="/five-simple-accessibility-checks-cover.png"
+                      alt="Five Accessibility Essentials cover"
+                      className="block h-full w-full object-contain"
+                    />
+                  </div>
+                  <div className="home-guide-copy">
+                    <p className="font-mono text-xs font-black uppercase tracking-[0.12em] text-[#ff5a00]">10-minute quick start</p>
+                    <h5 className="home-guide-title">Five Accessibility Essentials</h5>
+                    <p className="mt-4 text-sm font-semibold leading-relaxed text-black/70">
+                      Check your website with five simple accessibility essentials.
+                    </p>
+                    <span className="home-guide-cta">
+                      <span className="home-guide-arrow"><ArrowRight size={20} strokeWidth={3} /></span>
+                    </span>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            <div id="atlas" className="mt-16 scroll-mt-32">
               <div className="mb-7 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p className="mb-3 font-mono text-xs font-black uppercase tracking-[0.14em] text-[#ff5a00]">
