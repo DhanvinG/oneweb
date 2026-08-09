@@ -55,6 +55,19 @@ function makeScanId() {
     : `scan-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function previewProxyUrl(value: string) {
+  try {
+    const url = new URL(value);
+    const pathMatch = url.pathname.match(/\/d\/([a-zA-Z0-9_-]{10,100})/);
+    const fileId = url.searchParams.get('id') || pathMatch?.[1] || '';
+    return /^[a-zA-Z0-9_-]{10,100}$/.test(fileId)
+      ? `/api/lumen-preview?id=${encodeURIComponent(fileId)}`
+      : value;
+  } catch {
+    return value;
+  }
+}
+
 async function readApi(response: Response): Promise<ApiResponse> {
   const payload = (await response.json().catch(() => null)) as ApiResponse | null;
   if (!response.ok || !payload?.ok) {
@@ -212,18 +225,21 @@ export default function App() {
       <section className="results" aria-labelledby="results-title">
         <h1 id="results-title">Your Report Is Ready</h1>
         <div className="report-pages" aria-label={`Three-page accessibility report for ${report?.domain || submittedDomain}`}>
-          {report?.previewUrls.map((previewUrl, index) => (
-            <a
-              className="report-page"
-              href={previewUrl}
-              target="_blank"
-              rel="noreferrer"
-              key={previewUrl}
-              aria-label={`Open report page ${index + 1} in a new tab`}
-            >
-              <img src={previewUrl} alt={`Accessibility report page ${index + 1} of 3 for ${report.domain}`} />
-            </a>
-          ))}
+          {report?.previewUrls.map((previewUrl, index) => {
+            const proxiedUrl = previewProxyUrl(previewUrl);
+            return (
+              <a
+                className="report-page"
+                href={proxiedUrl}
+                target="_blank"
+                rel="noreferrer"
+                key={previewUrl}
+                aria-label={`Open report page ${index + 1} in a new tab`}
+              >
+                <img src={proxiedUrl} alt={`Accessibility report page ${index + 1} of 3 for ${report.domain}`} />
+              </a>
+            );
+          })}
         </div>
         {report && (
           <a className="download-button" href={report.pdfUrl} target="_blank" rel="noreferrer">
