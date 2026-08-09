@@ -1170,13 +1170,12 @@ function loadAuditLibrary_() {
     throw new Error('AUDIT_LIBRARY_SPREADSHEET_ID is not configured.');
   }
 
-  const range = "'" + String(ONEWEB.AUDIT_LIBRARY_SHEET).replace(/'/g, "''") + "'!A2:L";
   const sheetsUrl =
-    'https://sheets.googleapis.com/v4/spreadsheets/' +
+    'https://docs.google.com/spreadsheets/d/' +
     encodeURIComponent(spreadsheetId) +
-    '/values/' +
-    encodeURIComponent(range) +
-    '?majorDimension=ROWS';
+    '/gviz/tq?tqx=out%3Acsv&sheet=' +
+    encodeURIComponent(ONEWEB.AUDIT_LIBRARY_SHEET) +
+    '&range=A1%3AL';
   const response = UrlFetchApp.fetch(sheetsUrl, {
     method: 'get',
     muteHttpExceptions: true,
@@ -1189,7 +1188,7 @@ function loadAuditLibrary_() {
     throw new Error('Audit Library could not be read with the configured read-only Sheets access.');
   }
 
-  const rows = JSON.parse(response.getContentText()).values || [];
+  const rows = Utilities.parseCsv(response.getContentText());
   const headers = rows.length ? rows[0] : [];
 
   if (!headers.length || rows.length < 2) {
