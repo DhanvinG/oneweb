@@ -12,7 +12,6 @@ type VercelResponse = {
   setHeader(name: string, value: string): void;
   status(code: number): VercelResponse;
   json(value: unknown): void;
-  type(value: string): VercelResponse;
   send(value: string): void;
 };
 
@@ -54,7 +53,8 @@ export default async function handler(request: VercelRequest, response: VercelRe
         signal: AbortSignal.timeout(15000),
       });
       const text = await upstream.text();
-      return response.status(upstream.ok ? 200 : 502).type('application/json').send(text);
+      response.setHeader('Content-Type', 'application/json; charset=utf-8');
+      return response.status(upstream.ok ? 200 : 502).send(text);
     }
 
     if (request.method !== 'POST') {
@@ -81,7 +81,8 @@ export default async function handler(request: VercelRequest, response: VercelRe
       signal: AbortSignal.timeout(290000),
     });
     const text = await upstream.text();
-    return response.status(upstream.ok ? 200 : 502).type('application/json').send(text);
+    response.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return response.status(upstream.ok ? 200 : 502).send(text);
   } catch (error) {
     console.error('Lumen upstream request failed.', error);
     const message = error instanceof Error && error.name === 'TimeoutError'
