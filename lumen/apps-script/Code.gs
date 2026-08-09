@@ -1170,26 +1170,31 @@ function loadAuditLibrary_() {
     throw new Error('AUDIT_LIBRARY_SPREADSHEET_ID is not configured.');
   }
 
-  const sheet = SpreadsheetApp.openById(spreadsheetId)
-    .getSheetByName(ONEWEB.AUDIT_LIBRARY_SHEET);
+  const range = "'" + String(ONEWEB.AUDIT_LIBRARY_SHEET).replace(/'/g, "''") + "'!A2:L";
+  const sheetsUrl =
+    'https://sheets.googleapis.com/v4/spreadsheets/' +
+    encodeURIComponent(spreadsheetId) +
+    '/values/' +
+    encodeURIComponent(range) +
+    '?majorDimension=ROWS';
+  const response = UrlFetchApp.fetch(sheetsUrl, {
+    method: 'get',
+    muteHttpExceptions: true,
+    headers: {
+      Authorization: 'Bearer ' + ScriptApp.getOAuthToken()
+    }
+  });
 
-  if (!sheet) {
-    throw new Error('Audit Library tab was not found.');
+  if (response.getResponseCode() !== 200) {
+    throw new Error('Audit Library could not be read with the configured read-only Sheets access.');
   }
 
-  const lastRow = sheet.getLastRow();
+  const rows = JSON.parse(response.getContentText()).values || [];
+  const headers = rows.length ? rows[0] : [];
 
-  if (lastRow < ONEWEB.FIRST_DATA_ROW) {
+  if (!headers.length || rows.length < 2) {
     return {};
   }
-
-  const lastColumn = Math.max(sheet.getLastColumn(), 12);
-  const headers = sheet.getRange(
-    ONEWEB.HEADER_ROW,
-    1,
-    1,
-    lastColumn
-  ).getValues()[0];
 
   const headerMap = {};
   headers.forEach(function (header, index) {
@@ -1216,12 +1221,7 @@ function loadAuditLibrary_() {
     );
   }
 
-  const values = sheet.getRange(
-    ONEWEB.FIRST_DATA_ROW,
-    1,
-    lastRow - ONEWEB.FIRST_DATA_ROW + 1,
-    lastColumn
-  ).getValues();
+  const values = rows.slice(1);
 
   const library = {};
 
