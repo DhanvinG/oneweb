@@ -18,8 +18,8 @@ type VercelResponse = {
 
 export const config = { maxDuration: 300 };
 
-const endpoint = process.env.LUMEN_APPS_SCRIPT_URL || '';
-const backendSecret = process.env.LUMEN_BACKEND_SECRET || '';
+const endpoint = (process.env.LUMEN_APPS_SCRIPT_URL || '').trim();
+const backendSecret = (process.env.LUMEN_BACKEND_SECRET || '').trim();
 
 function clientKey(request: VercelRequest) {
   const forwarded = String(request.headers['x-forwarded-for'] || '').split(',')[0].trim();
@@ -83,6 +83,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
     const text = await upstream.text();
     return response.status(upstream.ok ? 200 : 502).type('application/json').send(text);
   } catch (error) {
+    console.error('Lumen upstream request failed.', error);
     const message = error instanceof Error && error.name === 'TimeoutError'
       ? 'The scan took too long. Please try again in a few minutes.'
       : 'Lumen could not reach the scanner. Please try again.';
