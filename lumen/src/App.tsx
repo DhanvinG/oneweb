@@ -31,7 +31,7 @@ const stages = [
 ];
 
 const apiUrl = import.meta.env.VITE_LUMEN_API_URL || '/api/lumen';
-const homeTitle = 'Website Accessibility Scanner & Report | Lumen by OneWeb';
+const homeTitle = 'Lumen by OneWeb';
 
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
@@ -119,7 +119,7 @@ export default function App() {
     setStage(5);
     setReport(result);
     setScreen('results');
-    document.title = `Accessibility report for ${result.domain} | Lumen`;
+    document.title = homeTitle;
   };
 
   const pollStatus = async (scanId: string) => {
@@ -156,7 +156,7 @@ export default function App() {
     setStage(0);
     setReport(null);
     setScreen('progress');
-    document.title = `Analyzing ${domain} | Lumen`;
+    document.title = homeTitle;
     pollStatus(scanId);
 
     try {
