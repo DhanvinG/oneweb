@@ -335,11 +335,11 @@ a { color: inherit; }
   position: relative;
   z-index: 4;
   display: flex;
-  min-height: 96px;
-  align-items: flex-start;
+  min-height: 62px;
+  align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  padding: 1.4rem 1.5rem .8rem;
+  padding: .55rem 1.15rem .35rem;
 }
 
 .results-header .brand--compact .brand__name { font-size: clamp(1.45rem, 1.95vw, 2.05rem); }
@@ -348,16 +348,16 @@ a { color: inherit; }
 .results-actions { display: flex; align-items: center; gap: .8rem; }
 
 .action-button {
-  min-height: 64px;
-  border: 3px solid rgba(255, 255, 255, .58);
-  border-radius: 10px;
-  padding: .8rem 1.45rem;
-  font-size: clamp(.95rem, 1.25vw, 1.2rem);
+  min-height: 42px;
+  border: 2px solid rgba(255, 255, 255, .58);
+  border-radius: 8px;
+  padding: .42rem .85rem;
+  font-size: clamp(.78rem, .9vw, .94rem);
   white-space: nowrap;
   box-shadow: 0 9px 25px rgba(0, 45, 119, .18), inset 0 1px rgba(255,255,255,.35);
 }
 
-.action-button svg { width: 1.35em; height: 1.35em; }
+.action-button svg { width: 1.15em; height: 1.15em; }
 .action-button--download { background: rgba(255, 255, 255, .96); color: #101820; }
 .action-button--download:hover { background: #fff; }
 .action-button--another { background: rgba(36, 132, 233, .64); backdrop-filter: blur(12px); }
@@ -367,7 +367,7 @@ a { color: inherit; }
   position: relative;
   z-index: 3;
   width: 100%;
-  padding: 0 clamp(.7rem, 1.25vw, 1.5rem) 1.2rem;
+  padding: 0 clamp(.25rem, .45vw, .55rem) .55rem;
 }
 
 .report-pages {
@@ -375,15 +375,15 @@ a { color: inherit; }
   width: 100%;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: start;
-  gap: clamp(.45rem, .8vw, .9rem);
+  gap: clamp(.25rem, .42vw, .5rem);
 }
 
 .report-page {
   display: block;
   min-width: 0;
   overflow: hidden;
-  border: 3px solid rgba(255, 255, 255, .76);
-  border-radius: 13px;
+  border: 2px solid rgba(255, 255, 255, .76);
+  border-radius: 10px;
   background: #fff;
   box-shadow: 0 14px 36px rgba(0, 46, 122, .2), inset 0 0 0 1px rgba(23, 126, 237, .24);
 }
@@ -431,9 +431,9 @@ a { color: inherit; }
 
   .progress-card { width: min(41%, 360px); min-width: 260px; }
 
-  .results-header { align-items: flex-start; }
+  .results-header { align-items: center; }
   .results-actions { gap: .55rem; }
-  .action-button { min-height: 56px; padding: .65rem 1rem; }
+  .action-button { min-height: 42px; padding: .42rem .75rem; }
 
   .report-pages {
     display: flex;
@@ -476,13 +476,14 @@ a { color: inherit; }
   .progress-card__spinner { flex-basis: 26px; width: 26px; height: 26px; border-width: 4px; }
 
   .results-header {
-    min-height: 137px;
-    padding: 1rem .8rem .6rem;
+    min-height: 106px;
+    align-items: flex-start;
+    padding: .65rem .7rem .4rem;
   }
 
   .results-header .brand--compact .brand__name { font-size: 1.4rem; }
   .results-actions { flex-direction: column; align-items: stretch; }
-  .action-button { min-height: 48px; padding: .5rem .72rem; font-size: .8rem; gap: .4rem; }
+  .action-button { min-height: 38px; padding: .35rem .62rem; font-size: .74rem; gap: .35rem; }
   .results { padding-inline: .25rem; }
 }
 
