@@ -33,6 +33,7 @@ function fail(response: VercelResponse, status: number, error: string) {
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   response.setHeader('Cache-Control', 'no-store');
   response.setHeader('X-Content-Type-Options', 'nosniff');
+  response.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
 
   if (!endpoint || !backendSecret) {
     return fail(response, 503, 'Lumen is not connected to its scanner yet.');

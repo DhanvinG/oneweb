@@ -31,6 +31,7 @@ const stages = [
 ];
 
 const apiUrl = import.meta.env.VITE_LUMEN_API_URL || '/api/lumen';
+const homeTitle = 'Website Accessibility Scanner & Report | Lumen by OneWeb';
 
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
@@ -67,6 +68,19 @@ function previewProxyUrl(value: string) {
     const fileId = url.searchParams.get('id') || pathMatch?.[1] || '';
     return /^[a-zA-Z0-9_-]{10,100}$/.test(fileId)
       ? `/api/lumen-preview?id=${encodeURIComponent(fileId)}`
+      : value;
+  } catch {
+    return value;
+  }
+}
+
+function downloadProxyUrl(value: string) {
+  try {
+    const url = new URL(value);
+    const pathMatch = url.pathname.match(/\/d\/([a-zA-Z0-9_-]{10,100})/);
+    const fileId = url.searchParams.get('id') || pathMatch?.[1] || '';
+    return /^[a-zA-Z0-9_-]{10,100}$/.test(fileId)
+      ? `/api/lumen-download?id=${encodeURIComponent(fileId)}`
       : value;
   } catch {
     return value;
@@ -157,7 +171,7 @@ export default function App() {
       stopPolling();
       setError(scanError instanceof Error ? scanError.message : 'Lumen could not complete this scan.');
       setScreen('landing');
-      document.title = 'Lumen by OneWeb';
+      document.title = homeTitle;
     }
   };
 
@@ -169,7 +183,7 @@ export default function App() {
     setError('');
     setReport(null);
     setScreen('landing');
-    document.title = 'Lumen by OneWeb';
+    document.title = homeTitle;
     window.requestAnimationFrame(() => urlInputRef.current?.focus());
   };
 
@@ -238,13 +252,13 @@ export default function App() {
   }
 
   return (
-    <main className="app app--results">
+    <main className="app app--results" data-nosnippet>
       <PixelHarbor mode="results" />
       <header className="results-header">
         <Brand compact />
         <nav className="results-actions" aria-label="Report actions">
           {report && (
-            <a className="action-button action-button--download" href={report.pdfUrl} target="_blank" rel="noreferrer">
+            <a className="action-button action-button--download" href={downloadProxyUrl(report.pdfUrl)} target="_blank" rel="nofollow noreferrer">
               <span>Download PDF</span>
               <Download aria-hidden="true" strokeWidth={2.7} />
             </a>
@@ -265,7 +279,7 @@ export default function App() {
                 className="report-page"
                 href={proxiedUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="nofollow noreferrer"
                 key={previewUrl}
                 aria-label={`Open report page ${index + 1} in a new tab`}
               >
