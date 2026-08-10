@@ -262,54 +262,19 @@ a { color: inherit; }
   margin-top: clamp(2.5rem, 5vh, 4.2rem);
 }
 
-.report-card {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: .8rem;
-}
-
 .report-page {
-  position: relative;
   display: block;
-  width: 100%;
   min-width: 0;
   overflow: hidden;
   border: 5px solid var(--black);
   border-radius: 15px;
   background: white;
-  padding: 0;
   box-shadow: 0 1px 0 rgba(0,0,0,.1);
-  color: var(--black);
-  cursor: zoom-in;
 }
 
 .report-page img { display: block; width: 100%; height: auto; aspect-ratio: 8.5 / 11; object-fit: contain; }
 .report-page:hover { transform: translateY(-4px); }
 .report-page:focus-visible { outline: 7px solid var(--lime); outline-offset: 5px; }
-
-.report-page__hint {
-  position: absolute;
-  right: .75rem;
-  bottom: .75rem;
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  border: 3px solid var(--black);
-  border-radius: 999px;
-  background: var(--lime);
-  padding: .5rem .75rem;
-  font-size: .9rem;
-  font-weight: 900;
-  line-height: 1;
-  box-shadow: 2px 2px 0 var(--black);
-}
-
-.report-page__hint svg { width: 1.05rem; height: 1.05rem; }
-
-.report-card__label { display: flex; min-width: 0; flex-direction: column; padding: 0 .2rem; }
-.report-card__label span { font-size: .78rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
-.report-card__label strong { margin-top: .15rem; font-size: clamp(1rem, 1.35vw, 1.3rem); line-height: 1.15; }
 
 .download-button {
   display: inline-flex;
@@ -332,100 +297,6 @@ a { color: inherit; }
 .download-button:hover { background: var(--lime); }
 .download-button:focus-visible { outline: 7px solid var(--lime); outline-offset: 5px; }
 
-.report-viewer {
-  position: fixed;
-  z-index: 100;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgba(5, 5, 5, .88);
-  padding: 1.25rem;
-}
-
-.report-viewer__panel {
-  display: flex;
-  width: min(96vw, 1180px);
-  height: min(96dvh, 980px);
-  overflow: hidden;
-  flex-direction: column;
-  border: 5px solid var(--black);
-  border-radius: 18px;
-  background: var(--blue);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, .5);
-}
-
-.report-viewer__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  border-bottom: 4px solid var(--black);
-  background: white;
-  padding: .85rem 1rem .85rem 1.25rem;
-}
-
-.report-viewer__header span { font-size: .76rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
-.report-viewer__header h2 { margin: .15rem 0 0; font-size: clamp(1rem, 2vw, 1.45rem); line-height: 1.1; }
-
-.report-viewer__controls { display: flex; align-items: center; gap: .45rem; }
-.report-viewer__controls button,
-.report-viewer__nav {
-  display: inline-grid;
-  width: 46px;
-  height: 46px;
-  flex: 0 0 auto;
-  place-items: center;
-  border: 3px solid var(--black);
-  border-radius: 9px;
-  background: white;
-  color: var(--black);
-  cursor: pointer;
-}
-
-.report-viewer__controls button:hover:not(:disabled),
-.report-viewer__nav:hover { background: var(--lime); }
-.report-viewer__controls button:focus-visible,
-.report-viewer__nav:focus-visible { outline: 4px solid var(--lime); outline-offset: 3px; }
-.report-viewer__controls button:disabled { cursor: not-allowed; opacity: .4; }
-.report-viewer__controls svg, .report-viewer__nav svg { width: 1.5rem; height: 1.5rem; stroke-width: 3; }
-.report-viewer__controls output { min-width: 4rem; text-align: center; font-weight: 900; }
-
-.report-viewer__stage {
-  display: grid;
-  min-height: 0;
-  flex: 1;
-  grid-template-columns: 64px minmax(0, 1fr) 64px;
-  align-items: center;
-  gap: .8rem;
-  padding: 1rem;
-}
-
-.report-viewer__canvas {
-  width: min(76vw, 760px);
-  height: 100%;
-  max-height: calc(96dvh - 155px);
-  justify-self: center;
-  overflow: auto;
-  overscroll-behavior: contain;
-  border: 3px solid rgba(5, 5, 5, .35);
-  border-radius: 8px;
-  background: #dbe9f8;
-  padding: 1rem;
-}
-
-.report-viewer__image-wrap { min-width: 75%; margin: 0 auto; transition: width 140ms ease; }
-.report-viewer__image-wrap img { display: block; width: 100%; height: auto; border: 2px solid var(--black); background: white; box-shadow: 0 8px 28px rgba(0, 0, 0, .25); }
-
-.report-viewer__help {
-  margin: 0;
-  background: var(--black);
-  padding: .55rem 1rem;
-  color: white;
-  text-align: center;
-  font-size: .82rem;
-  font-weight: 700;
-}
-
 @media (max-width: 800px) {
   .landing { justify-content: flex-start; padding-top: 22vh; }
   .brand__name { font-size: clamp(4.7rem, 25vw, 8.5rem); }
@@ -446,22 +317,8 @@ a { color: inherit; }
   .step-label { padding-top: .35rem; font-size: clamp(1rem, 4.5vw, 1.35rem); }
   .results h1 { max-width: 650px; }
   .report-pages { display: flex; width: calc(100vw - 1rem); gap: 1rem; margin-top: 2rem; overflow-x: auto; padding: .5rem max(1rem, calc((100vw - min(82vw, 400px)) / 2)) 1.3rem; scroll-snap-type: x mandatory; scrollbar-color: var(--black) transparent; }
-  .report-card { flex: 0 0 min(82vw, 400px); scroll-snap-align: center; }
-  .report-page { border-width: 4px; }
+  .report-page { flex: 0 0 min(82vw, 400px); border-width: 4px; scroll-snap-align: center; }
   .download-button { width: min(92vw, 440px); min-width: 0; min-height: 78px; margin-top: 1.5rem; gap: 1rem; font-size: clamp(1.35rem, 6vw, 2rem); }
-  .report-viewer { padding: 0; }
-  .report-viewer__panel { width: 100vw; height: 100dvh; border: 0; border-radius: 0; }
-  .report-viewer__header { align-items: flex-start; padding: .7rem; }
-  .report-viewer__header h2 { max-width: 36vw; }
-  .report-viewer__controls { gap: .25rem; }
-  .report-viewer__controls button { width: 40px; height: 40px; border-width: 2px; }
-  .report-viewer__controls output { min-width: 3.2rem; font-size: .85rem; }
-  .report-viewer__stage { position: relative; display: block; padding: .65rem; }
-  .report-viewer__canvas { width: 100%; height: 100%; max-height: calc(100dvh - 130px); padding: .5rem; }
-  .report-viewer__nav { position: absolute; z-index: 2; bottom: 1.4rem; width: 48px; height: 48px; border-width: 3px; box-shadow: 2px 2px 0 var(--black); }
-  .report-viewer__nav--previous { left: 1.2rem; }
-  .report-viewer__nav--next { right: 1.2rem; }
-  .report-viewer__help { display: none; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
