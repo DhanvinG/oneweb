@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Check, Download } from 'lucide-react';
+import { ArrowRight, Check, ChevronLeft, ChevronRight, Download, Maximize2, Minus, Plus, X } from 'lucide-react';
 
 type Screen = 'landing' | 'progress' | 'results';
 
@@ -27,6 +27,12 @@ const stages = [
   'Comparing findings across pages',
   'Identifying your highest priorities',
   'Building your report',
+];
+
+const reportPageLabels = [
+  'Accessibility Snapshot',
+  'Issue Categories',
+  'Recommended Action Plan',
 ];
 
 const apiUrl = import.meta.env.VITE_LUMEN_API_URL || '/api/lumen';
@@ -83,12 +89,78 @@ export default function App() {
   const [stage, setStage] = useState(0);
   const [error, setError] = useState('');
   const [report, setReport] = useState<ReportResult | null>(null);
+  const [viewerPage, setViewerPage] = useState<number | null>(null);
+  const [viewerZoom, setViewerZoom] = useState(1);
   const pollTimer = useRef<number | null>(null);
   const scanIdRef = useRef('');
+  const viewerRef = useRef<HTMLDivElement | null>(null);
+  const closeViewerRef = useRef<HTMLButtonElement | null>(null);
+  const lastPreviewTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
 
   useEffect(() => () => {
     if (pollTimer.current) window.clearTimeout(pollTimer.current);
   }, []);
+
+  useEffect(() => {
+    if (viewerPage === null) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeViewerRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setViewerPage(null);
+        window.setTimeout(() => lastPreviewTriggerRef.current?.focus(), 0);
+        return;
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        setViewerPage((current) => current === null ? current : (current + 1) % (report?.previewUrls.length || 1));
+        setViewerZoom(1);
+        return;
+      }
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        setViewerPage((current) => current === null ? current : (current - 1 + (report?.previewUrls.length || 1)) % (report?.previewUrls.length || 1));
+        setViewerZoom(1);
+        return;
+      }
+      if (event.key === '+' || event.key === '=') {
+        event.preventDefault();
+        setViewerZoom((current) => Math.min(2.5, current + .25));
+        return;
+      }
+      if (event.key === '-') {
+        event.preventDefault();
+        setViewerZoom((current) => Math.max(.75, current - .25));
+        return;
+      }
+      if (event.key === 'Tab' && viewerRef.current) {
+        const focusable = Array.from(
+          viewerRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'),
+        );
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [viewerPage, report?.previewUrls.length]);
 
   const stopPolling = () => {
     if (pollTimer.current) window.clearTimeout(pollTimer.current);
@@ -101,6 +173,23 @@ export default function App() {
     setReport(result);
     setScreen('results');
     document.title = `Accessibility report for ${result.domain} | Lumen`;
+  };
+
+  const openViewer = (index: number, trigger: HTMLButtonElement) => {
+    lastPreviewTriggerRef.current = trigger;
+    setViewerZoom(1);
+    setViewerPage(index);
+  };
+
+  const closeViewer = () => {
+    setViewerPage(null);
+    window.setTimeout(() => lastPreviewTriggerRef.current?.focus(), 0);
+  };
+
+  const moveViewer = (direction: number) => {
+    const pageCount = report?.previewUrls.length || 1;
+    setViewerPage((current) => current === null ? current : (current + direction + pageCount) % pageCount);
+    setViewerZoom(1);
   };
 
   const pollStatus = async (scanId: string) => {
@@ -227,17 +316,23 @@ export default function App() {
         <div className="report-pages" aria-label={`Three-page accessibility report for ${report?.domain || submittedDomain}`}>
           {report?.previewUrls.map((previewUrl, index) => {
             const proxiedUrl = previewProxyUrl(previewUrl);
+            const pageLabel = reportPageLabels[index] || `Report Page ${index + 1}`;
             return (
-              <a
-                className="report-page"
-                href={proxiedUrl}
-                target="_blank"
-                rel="noreferrer"
-                key={previewUrl}
-                aria-label={`Open report page ${index + 1} in a new tab`}
-              >
-                <img src={proxiedUrl} alt={`Accessibility report page ${index + 1} of 3 for ${report.domain}`} />
-              </a>
+              <article className="report-card" key={previewUrl}>
+                <button
+                  className="report-page"
+                  type="button"
+                  onClick={(event) => openViewer(index, event.currentTarget)}
+                  aria-label={`View page ${index + 1}, ${pageLabel}, full screen`}
+                >
+                  <img src={proxiedUrl} alt={`Accessibility report page ${index + 1} of 3 for ${report.domain}`} />
+                  <span className="report-page__hint"><Maximize2 aria-hidden="true" /> View page</span>
+                </button>
+                <div className="report-card__label">
+                  <span>Page {index + 1}</span>
+                  <strong>{pageLabel}</strong>
+                </div>
+              </article>
             );
           })}
         </div>
@@ -248,6 +343,74 @@ export default function App() {
           </a>
         )}
       </section>
+      {viewerPage !== null && report && (
+        <div
+          className="report-viewer"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="report-viewer-title"
+          ref={viewerRef}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeViewer();
+          }}
+        >
+          <div className="report-viewer__panel">
+            <header className="report-viewer__header">
+              <div>
+                <span>Page {viewerPage + 1} of {report.previewUrls.length}</span>
+                <h2 id="report-viewer-title">{reportPageLabels[viewerPage] || `Report Page ${viewerPage + 1}`}</h2>
+              </div>
+              <div className="report-viewer__controls" aria-label="Report viewer controls">
+                <button
+                  type="button"
+                  onClick={() => setViewerZoom((current) => Math.max(.75, current - .25))}
+                  disabled={viewerZoom <= .75}
+                  aria-label="Zoom out"
+                ><Minus aria-hidden="true" /></button>
+                <output aria-live="polite" aria-label="Current zoom">{Math.round(viewerZoom * 100)}%</output>
+                <button
+                  type="button"
+                  onClick={() => setViewerZoom((current) => Math.min(2.5, current + .25))}
+                  disabled={viewerZoom >= 2.5}
+                  aria-label="Zoom in"
+                ><Plus aria-hidden="true" /></button>
+                <button type="button" onClick={() => setViewerZoom(1)} aria-label="Fit page to viewer">
+                  <Maximize2 aria-hidden="true" />
+                </button>
+                <button type="button" onClick={closeViewer} aria-label="Close report viewer" ref={closeViewerRef}>
+                  <X aria-hidden="true" />
+                </button>
+              </div>
+            </header>
+            <div
+              className="report-viewer__stage"
+              onTouchStart={(event) => { touchStartXRef.current = event.touches[0]?.clientX ?? null; }}
+              onTouchEnd={(event) => {
+                if (touchStartXRef.current === null) return;
+                const distance = (event.changedTouches[0]?.clientX ?? touchStartXRef.current) - touchStartXRef.current;
+                touchStartXRef.current = null;
+                if (Math.abs(distance) >= 55) moveViewer(distance < 0 ? 1 : -1);
+              }}
+            >
+              <button className="report-viewer__nav report-viewer__nav--previous" type="button" onClick={() => moveViewer(-1)} aria-label="Previous report page">
+                <ChevronLeft aria-hidden="true" />
+              </button>
+              <div className="report-viewer__canvas">
+                <div className="report-viewer__image-wrap" style={{ width: `${viewerZoom * 100}%` }}>
+                  <img
+                    src={previewProxyUrl(report.previewUrls[viewerPage])}
+                    alt={`Accessibility report page ${viewerPage + 1} of ${report.previewUrls.length} for ${report.domain}`}
+                  />
+                </div>
+              </div>
+              <button className="report-viewer__nav report-viewer__nav--next" type="button" onClick={() => moveViewer(1)} aria-label="Next report page">
+                <ChevronRight aria-hidden="true" />
+              </button>
+            </div>
+            <p className="report-viewer__help">Use the arrow keys to change pages, + or − to zoom, and Escape to close.</p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
