@@ -434,15 +434,6 @@ function drawPixelGlow(ctx: CanvasRenderingContext2D, x: number, y: number, radi
   }
 }
 
-function drawCheck(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
-  ctx.fillStyle = '#dfff39';
-  ctx.fillRect(x - size, y - size, size * 2 + 1, size * 2 + 1);
-  ctx.fillStyle = '#173618';
-  ctx.fillRect(x - 2, y, 2, 1);
-  ctx.fillRect(x, y + 1, 2, 1);
-  ctx.fillRect(x + 2, y - 1, 1, 2);
-}
-
 function drawPort(
   ctx: CanvasRenderingContext2D,
   portImage: HTMLImageElement,
@@ -460,7 +451,6 @@ function drawPort(
   const number = index + 1;
   const activeStage = Math.max(1, Math.min(5, stage || 1));
   const active = mode === 'progress' && number === activeStage;
-  const complete = mode === 'progress' && number < activeStage;
 
   drawPortRipples(ctx, index, x, waterY, buoy.scale, tick, active, reducedMotion);
 
@@ -493,8 +483,6 @@ function drawPort(
     ctx.fillStyle = '#ffffd0';
     centeredRect(ctx, x, lampY - 1, buoy.scale > .75 ? 3 : 2, buoy.scale > .75 ? 3 : 2);
     ctx.restore();
-  } else if (complete) {
-    drawCheck(ctx, Math.round(x), Math.round(lampY), buoy.scale > .75 ? 3 : 2);
   }
 }
 
