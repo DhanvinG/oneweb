@@ -1133,7 +1133,7 @@ export default function App() {
                 description: 'Working with leaders and institutions to build accessibility into the systems they shape.',
                 image: '/policyimage.jpeg',
                 alt: 'People participating in policy and advocacy work',
-                href: 'https://youthaccessibilitynetwork.org',
+                href: 'https://forms.gle/styaEYuFpZqvTemg7',
                 cta: 'Work with Us',
                 accent: 'bg-[#3083FD]',
                 position: 'md:rotate-1',
