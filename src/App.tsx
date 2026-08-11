@@ -1133,7 +1133,7 @@ export default function App() {
                 description: 'Working with leaders and institutions to build accessibility into the systems they shape.',
                 image: '/policyimage.jpeg',
                 alt: 'People participating in policy and advocacy work',
-                href: 'https://youthaccessibilitynetwork.org',
+                href: 'https://forms.gle/styaEYuFpZqvTemg7',
                 cta: 'Work with Us',
                 accent: 'bg-[#3083FD]',
                 position: 'md:rotate-1',
@@ -1418,6 +1418,72 @@ export default function App() {
             </div>
           </div>
 
+          <section id="technology" className="mt-24 scroll-mt-32" aria-labelledby="technology-title">
+            <div className="mb-10 text-center">
+              <div>
+                <p className="mb-3 font-mono text-sm font-black uppercase tracking-[0.14em] text-[#ff5a00]">
+                  Assistive Technology
+                </p>
+                <h3
+                  id="technology-title"
+                  className="font-['Anton'] text-[3.5rem] uppercase leading-[0.9] tracking-[-0.025em] md:text-[5rem]"
+                >
+                  Products
+                </h3>
+              </div>
+            </div>
+
+            <div className="grid items-stretch gap-8 lg:grid-cols-2">
+              <article className="relative min-w-0 overflow-hidden border-[3px] border-[#f4f4f4] bg-black">
+                <h4 className="sr-only">Swype AI</h4>
+                <div>
+                  <iframe
+                    src="https://www.canva.com/design/DAGppPFptPU/jtj8qCgNKEPMF-opb3Inag/view?embed"
+                    title="Swype AI interactive Canva preview"
+                    loading="lazy"
+                    allow="fullscreen"
+                    allowFullScreen
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    className="block aspect-video w-full border-0"
+                  />
+                </div>
+                <a
+                  href="https://swypeai.tech/"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Open the full Swype AI website in a new tab"
+                  title="Open full Swype AI website"
+                  className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/80 text-white backdrop-blur-sm transition-transform hover:scale-105 focus-visible:scale-105"
+                >
+                  <ArrowRight className="-rotate-45" size={17} strokeWidth={3} aria-hidden="true" />
+                </a>
+              </article>
+
+              <article className="relative min-w-0 overflow-hidden border-[3px] border-[#f4f4f4] bg-[#f4f4f4]">
+                <h4 className="sr-only">Cora</h4>
+                <div>
+                  <iframe
+                    src="https://trycora.app/"
+                    title="Interactive Cora voice browser assistant preview"
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    className="block aspect-video w-full border-0"
+                  />
+                </div>
+                <a
+                  href="https://trycora.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Open the full Cora website in a new tab"
+                  title="Open full Cora website"
+                  className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/80 text-white backdrop-blur-sm transition-transform hover:scale-105 focus-visible:scale-105"
+                >
+                  <ArrowRight className="-rotate-45" size={17} strokeWidth={3} aria-hidden="true" />
+                </a>
+              </article>
+            </div>
+          </section>
+
           <div id="resources" className="relative left-1/2 mt-24 w-screen -translate-x-1/2 bg-[#dcecff] px-6 py-16 md:px-12 md:py-20">
             <div className="mx-auto max-w-[1350px]">
             <div>
@@ -1450,10 +1516,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="mt-16">
-              <p className="mb-3 font-mono text-xs font-black uppercase tracking-[0.14em] text-[#ff5a00]">
-                Practical Guides
-              </p>
+            <div className="mt-12">
               <h4 className="font-['Anton'] text-[2.5rem] uppercase leading-none tracking-[-0.02em] md:text-[3.25rem]">
                 Accessibility Guides
               </h4>
@@ -1563,10 +1626,10 @@ export default function App() {
                   href="https://lumen.oneweb.social/"
                   target="_blank"
                   rel="noreferrer"
-                  className="group inline-flex w-fit shrink-0 items-center gap-4 border-[3px] border-black bg-[#075fc9] px-5 py-3.5 font-mono text-sm font-black uppercase tracking-[0.04em] text-white transition-colors hover:bg-black hover:text-white"
+                  className="group inline-flex w-fit shrink-0 items-center gap-4 border-[3px] border-black bg-[#075fc9] px-5 py-3.5 font-mono text-sm font-black uppercase tracking-[0.04em] text-black transition-colors hover:bg-black hover:text-white"
                 >
                   Open Full Lumen
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#075fc9] transition-all group-hover:translate-x-1 group-hover:text-black">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black text-[#075fc9] transition-all group-hover:translate-x-1 group-hover:bg-white group-hover:text-black">
                     <ArrowRight size={17} strokeWidth={3} />
                   </span>
                 </a>
@@ -1600,7 +1663,7 @@ export default function App() {
                   href="https://spotle.oneweb.social/"
                   target="_blank"
                   rel="noreferrer"
-                  className="group inline-flex w-fit shrink-0 items-center gap-4 border-[3px] border-black bg-[#fbd971] px-5 py-3.5 font-mono text-sm font-black uppercase tracking-[0.04em] text-[#18120f] transition-colors hover:bg-black hover:text-white"
+                  className="group inline-flex w-fit shrink-0 items-center gap-4 border-[3px] border-black bg-[#fbd971] px-5 py-3.5 font-mono text-sm font-black uppercase tracking-[0.04em] text-black transition-colors hover:bg-black hover:text-white"
                 >
                   Open Full Spotle
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#18120f] text-[#fbd971] transition-all group-hover:translate-x-1 group-hover:bg-white group-hover:text-black">
