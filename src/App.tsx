@@ -1536,11 +1536,85 @@ export default function App() {
                   </span>
                 </a>
               </div>
-              <div className="overflow-hidden border-[3px] border-black bg-white shadow-[8px_8px_0_#000]">
+              <div className="overflow-hidden border-[3px] border-black bg-[#eef6f5] shadow-[8px_8px_0_#075f85]">
                 <iframe
                   src="https://atlas.oneweb.social/"
                   title="Interactive OneWeb Atlas digital accessibility policy map"
                   aria-describedby="atlas-embed-description"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  className="block h-[620px] w-full border-0 md:h-[760px]"
+                />
+              </div>
+            </div>
+
+            <div id="lumen" className="mt-20 scroll-mt-32">
+              <div className="mb-7 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <p className="mb-3 font-mono text-xs font-black uppercase tracking-[0.14em] text-[#075fc9]">
+                    Interactive Tool
+                  </p>
+                  <h4 className="font-['Anton'] text-[2.5rem] uppercase leading-none tracking-[-0.02em] md:text-[3.25rem]">
+                    Scan with Lumen
+                  </h4>
+                  <p id="lumen-embed-description" className="mt-4 max-w-[760px] text-base font-semibold leading-relaxed text-black/70">
+                    Scan a public website for potential accessibility issues and receive a prioritized action plan.
+                  </p>
+                </div>
+                <a
+                  href="https://lumen.oneweb.social/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex w-fit shrink-0 items-center gap-4 border-[3px] border-black bg-[#075fc9] px-5 py-3.5 font-mono text-sm font-black uppercase tracking-[0.04em] text-white transition-colors hover:bg-black hover:text-white"
+                >
+                  Open Full Lumen
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#075fc9] transition-all group-hover:translate-x-1 group-hover:text-black">
+                    <ArrowRight size={17} strokeWidth={3} />
+                  </span>
+                </a>
+              </div>
+              <div className="overflow-hidden border-[3px] border-black bg-[#075fc9] shadow-[8px_8px_0_#075fc9]">
+                <iframe
+                  src="https://lumen.oneweb.social/"
+                  title="Interactive Lumen website accessibility scanner"
+                  aria-describedby="lumen-embed-description"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  className="block h-[620px] w-full border-0 md:h-[760px]"
+                />
+              </div>
+            </div>
+
+            <div id="spotle" className="mt-20 scroll-mt-32">
+              <div className="mb-7 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <p className="mb-3 font-mono text-xs font-black uppercase tracking-[0.14em] text-[#8a5a12]">
+                    Interactive Game
+                  </p>
+                  <h4 className="font-['Anton'] text-[2.5rem] uppercase leading-none tracking-[-0.02em] md:text-[3.25rem]">
+                    Play Spotle
+                  </h4>
+                  <p id="spotle-embed-description" className="mt-4 max-w-[760px] text-base font-semibold leading-relaxed text-black/70">
+                    Find the accessibility barrier hidden in each level and build your skills through play.
+                  </p>
+                </div>
+                <a
+                  href="https://spotle.oneweb.social/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex w-fit shrink-0 items-center gap-4 border-[3px] border-black bg-[#fbd971] px-5 py-3.5 font-mono text-sm font-black uppercase tracking-[0.04em] text-[#18120f] transition-colors hover:bg-black hover:text-white"
+                >
+                  Open Full Spotle
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#18120f] text-[#fbd971] transition-all group-hover:translate-x-1 group-hover:bg-white group-hover:text-black">
+                    <ArrowRight size={17} strokeWidth={3} />
+                  </span>
+                </a>
+              </div>
+              <div className="overflow-hidden border-[3px] border-black bg-[#18120f] shadow-[8px_8px_0_#8a5a12]">
+                <iframe
+                  src="https://spotle.oneweb.social/"
+                  title="Interactive Spotle digital accessibility learning game"
+                  aria-describedby="spotle-embed-description"
                   loading="lazy"
                   referrerPolicy="strict-origin-when-cross-origin"
                   className="block h-[620px] w-full border-0 md:h-[760px]"
