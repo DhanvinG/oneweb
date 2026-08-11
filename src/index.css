@@ -206,6 +206,10 @@
   transition: color 200ms ease, background-color 200ms ease, transform 200ms ease;
 }
 
+.home-guide-card-blue .home-guide-arrow {
+  background: #3083fd;
+}
+
 .home-guide-card:hover .home-guide-arrow,
 .home-guide-card:focus-visible .home-guide-arrow {
   color: #fff;
