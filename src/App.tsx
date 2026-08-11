@@ -1474,7 +1474,6 @@ export default function App() {
                     />
                   </div>
                   <div className="home-guide-copy">
-                    <p className="font-mono text-xs font-black uppercase tracking-[0.12em] text-[#ff5a00]">Full handbook</p>
                     <h5 className="home-guide-title">Digital Accessibility Guide</h5>
                     <p className="mt-4 text-sm font-semibold leading-relaxed text-black/70">
                       Practical steps for making websites easier for everyone to use.
@@ -1498,7 +1497,6 @@ export default function App() {
                     />
                   </div>
                   <div className="home-guide-copy">
-                    <p className="font-mono text-xs font-black uppercase tracking-[0.12em] text-[#ff5a00]">10-minute quick start</p>
                     <h5 className="home-guide-title">Five Accessibility Essentials</h5>
                     <p className="mt-4 text-sm font-semibold leading-relaxed text-black/70">
                       Check your website with five simple accessibility essentials.
