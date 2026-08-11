@@ -387,7 +387,7 @@ function StaticSiteHeader({ activeResource }: { activeResource?: ResourcePage })
           <img src="/logoimage.png" alt="OneWeb" className="h-[70px] w-[70px] object-contain" />
         </a>
 
-        <div className="hidden items-center justify-end gap-8 pr-7 font-mono text-[16px] font-bold lg:flex">
+        <div className="hidden items-center justify-end gap-4 pr-7 font-mono text-[14px] font-bold lg:flex xl:gap-6 xl:text-[15px] 2xl:gap-8 2xl:text-[16px]">
           <div className="nav-work-group group relative">
             <a href="/#our-work" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
               <span className="nav-draw-underline">Our Work</span>
@@ -397,12 +397,23 @@ function StaticSiteHeader({ activeResource }: { activeResource?: ResourcePage })
               <div className="border-2 border-black bg-black px-6 py-5 text-white">
                 <a href="https://swypeai.tech" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Swype AI</a>
                 <a href="https://trycora.app" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Cora</a>
-                <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
               </div>
             </div>
           </div>
 
-          <a href="/#impact" className="nav-draw-underline pb-1">Impact</a>
+          <div className="nav-work-group group relative">
+            <button type="button" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
+              <span className="nav-draw-underline">Education</span>
+              <ChevronDown size={16} strokeWidth={2.5} className="transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" aria-hidden="true" />
+            </button>
+            <div className="nav-work-menu absolute left-1/2 top-full z-[170] w-[220px] -translate-x-1/2 pt-3">
+              <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
+                <a href="https://lumen.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Lumen</a>
+                <a href="https://spotle.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Spotle</a>
+              </div>
+            </div>
+          </div>
 
           <div className="nav-work-group group relative">
             <button type="button" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
@@ -418,6 +429,7 @@ function StaticSiteHeader({ activeResource }: { activeResource?: ResourcePage })
             </div>
           </div>
 
+          <a href="/#impact" className="nav-draw-underline pb-1">Impact</a>
           <a href="https://swypeai.tech/about" target="_blank" rel="noreferrer" className="nav-draw-underline pb-1">About Us</a>
           <a href="/partnerships" className="nav-draw-underline pb-1">Partnerships</a>
           <button className="ml-1 hover:opacity-70" aria-label="Search"><Search size={20} strokeWidth={2.5} /></button>
@@ -544,7 +556,7 @@ function PartnershipsPage() {
             )}
           </a>
 
-          <div className="hidden lg:flex items-center justify-end gap-8 font-mono text-[16px] font-bold mt-[10px] pr-6">
+          <div className="hidden lg:flex items-center justify-end gap-4 font-mono text-[14px] font-bold mt-[10px] pr-6 xl:gap-6 xl:text-[15px] 2xl:gap-8 2xl:text-[16px]">
             <div className="nav-work-group group relative">
               <a href="/#our-work" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
                 <span className="nav-draw-underline">Our Work</span>
@@ -560,11 +572,22 @@ function PartnershipsPage() {
                 <div className="border-2 border-black bg-black px-6 py-5 text-white">
                   <a href="https://swypeai.tech" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Swype AI</a>
                   <a href="https://trycora.app" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Cora</a>
-                  <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
                 </div>
               </div>
             </div>
-            <a href="/#impact" className="nav-draw-underline pb-1">Impact</a>
+            <div className="nav-work-group group relative">
+              <button type="button" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
+                <span className="nav-draw-underline">Education</span>
+                <ChevronDown size={16} strokeWidth={2.5} className="transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" aria-hidden="true" />
+              </button>
+              <div className="nav-work-menu absolute left-1/2 top-full z-[120] w-[220px] -translate-x-1/2 pt-3">
+                <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                  <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
+                  <a href="https://lumen.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Lumen</a>
+                  <a href="https://spotle.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Spotle</a>
+                </div>
+              </div>
+            </div>
             <div className="nav-work-group group relative">
               <button type="button" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
                 <span className="nav-draw-underline">Resources</span>
@@ -578,6 +601,7 @@ function PartnershipsPage() {
                 </div>
               </div>
             </div>
+            <a href="/#impact" className="nav-draw-underline pb-1">Impact</a>
             <a
               href="https://swypeai.tech/about"
               target="_blank"
@@ -754,7 +778,7 @@ export default function App() {
           </a>
 
           {/* Desktop Links & Actions */}
-          <div className="hidden lg:flex items-center justify-end gap-8 font-mono text-[16px] font-bold mt-[10px] pr-6">
+          <div className="hidden lg:flex items-center justify-end gap-4 font-mono text-[14px] font-bold mt-[10px] pr-6 xl:gap-6 xl:text-[15px] 2xl:gap-8 2xl:text-[16px]">
             <div className="nav-work-group group relative">
               <a
                 href="#our-work"
@@ -778,22 +802,22 @@ export default function App() {
                   <a href="https://trycora.app" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">
                     Cora
                   </a>
-                  <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">
-                    Atlas
-                  </a>
                 </div>
               </div>
             </div>
-            <a
-              href="#impact"
-              className="nav-draw-underline pb-1"
-              onClick={(event) => {
-                event.preventDefault();
-                document.getElementById('impact')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }}
-            >
-              Impact
-            </a>
+            <div className="nav-work-group group relative">
+              <button type="button" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
+                <span className="nav-draw-underline">Education</span>
+                <ChevronDown size={16} strokeWidth={2.5} className="transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" aria-hidden="true" />
+              </button>
+              <div className="nav-work-menu absolute left-1/2 top-full z-[120] w-[220px] -translate-x-1/2 pt-3">
+                <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                  <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
+                  <a href="https://lumen.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Lumen</a>
+                  <a href="https://spotle.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Spotle</a>
+                </div>
+              </div>
+            </div>
             <div className="nav-work-group group relative">
               <button type="button" className="inline-flex items-center gap-1.5 pb-1" aria-haspopup="true">
                 <span className="nav-draw-underline">Resources</span>
@@ -807,6 +831,16 @@ export default function App() {
                 </div>
               </div>
             </div>
+            <a
+              href="#impact"
+              className="nav-draw-underline pb-1"
+              onClick={(event) => {
+                event.preventDefault();
+                document.getElementById('impact')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+            >
+              Impact
+            </a>
             <a href="https://swypeai.tech/about" target="_blank" rel="noreferrer" className="nav-draw-underline pb-1">About Us</a>
             <a href="/partnerships" className="nav-draw-underline pb-1">Partnerships</a>
             
