@@ -1536,7 +1536,7 @@ export default function App() {
                   </span>
                 </a>
               </div>
-              <div className="overflow-hidden border-[3px] border-black bg-[#eef6f5] shadow-[8px_8px_0_#075f85]">
+              <div className="overflow-hidden border-[3px] border-black bg-[#eef6f5] shadow-[8px_8px_0_#ff5a00]">
                 <iframe
                   src="https://atlas.oneweb.social/"
                   title="Interactive OneWeb Atlas digital accessibility policy map"
@@ -1610,7 +1610,7 @@ export default function App() {
                   </span>
                 </a>
               </div>
-              <div className="overflow-hidden border-[3px] border-black bg-[#18120f] shadow-[8px_8px_0_#8a5a12]">
+              <div className="overflow-hidden border-[3px] border-black bg-[#18120f] shadow-[8px_8px_0_#fbd971]">
                 <iframe
                   src="https://spotle.oneweb.social/"
                   title="Interactive Spotle digital accessibility learning game"
