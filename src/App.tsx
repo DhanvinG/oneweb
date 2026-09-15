@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, ChevronDown, X, ArrowRight, ArrowLeft, Globe, Activity } from 'lucide-react';
+import LearningHub from './LearningHub';
 
 const partnershipFormUrl = 'https://forms.gle/Db1hspzAnLF1UPjo7';
 const accessibilityGuideFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScNFpSDR5JRR5_elJldui6giG34PfRMZvvzag5_0ZHJEkMZfQ/viewform?usp=publish-editor';
@@ -377,7 +378,7 @@ function AccessibilityQuickStartSection() {
   );
 }
 
-type ResourcePage = 'guide' | 'checks' | 'flyers';
+type ResourcePage = 'guide' | 'checks' | 'flyers' | 'learning';
 
 function StaticSiteHeader({ activeResource }: { activeResource?: ResourcePage }) {
   return (
@@ -408,6 +409,7 @@ function StaticSiteHeader({ activeResource }: { activeResource?: ResourcePage })
             </button>
             <div className="nav-work-menu absolute left-1/2 top-full z-[170] w-[220px] -translate-x-1/2 pt-3">
               <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                <a href="/learning-hub" className="nav-dropdown-link block py-2" aria-current={activeResource === 'learning' ? 'page' : undefined}>Learning Hub</a>
                 <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
                 <a href="https://lumen.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Lumen</a>
                 <a href="https://spotle.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Spotle</a>
@@ -582,6 +584,7 @@ function PartnershipsPage() {
               </button>
               <div className="nav-work-menu absolute left-1/2 top-full z-[120] w-[220px] -translate-x-1/2 pt-3">
                 <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                  <a href="/learning-hub" className="nav-dropdown-link block py-2">Learning Hub</a>
                   <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
                   <a href="https://lumen.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Lumen</a>
                   <a href="https://spotle.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Spotle</a>
@@ -731,6 +734,10 @@ export default function App() {
     return <FlyersPage />;
   }
 
+  if (currentPath === '/learning-hub' || currentPath === '/academy') {
+    return <LearningHub header={<StaticSiteHeader activeResource="learning" />} />;
+  }
+
   return (
     <div className="w-full font-sans overflow-x-hidden">
       <div className="min-h-screen bg-[#3083FD] text-black relative">
@@ -812,6 +819,7 @@ export default function App() {
               </button>
               <div className="nav-work-menu absolute left-1/2 top-full z-[120] w-[220px] -translate-x-1/2 pt-3">
                 <div className="border-2 border-black bg-black px-6 py-5 text-white">
+                  <a href="/learning-hub" className="nav-dropdown-link block py-2">Learning Hub</a>
                   <a href="https://atlas.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Atlas</a>
                   <a href="https://lumen.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Lumen</a>
                   <a href="https://spotle.oneweb.social/" target="_blank" rel="noreferrer" className="nav-dropdown-link block py-2">Spotle</a>
