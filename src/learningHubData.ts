@@ -42,7 +42,7 @@ export const courseModules: CourseModule[] = [
         minutes: 6,
         summary: 'Digital accessibility means designing websites, apps, and digital content so people with disabilities can use them independently and effectively.',
         barrier: 'A digital experience may technically load while still excluding someone who cannot see the screen, hear audio, use a mouse, or process a dense layout.',
-        solution: 'Plan for different ways of seeing, hearing, moving, understanding, and communicating from the start—not as a repair at the end.',
+        solution: 'Plan for different ways of seeing, hearing, moving, understanding, and communicating from the start, not as a repair at the end.',
         takeaways: ['Accessibility is about equal use, not a special version.', 'Disability can be permanent, temporary, or situational.', 'Accessible design often makes products easier for everyone.'],
         challenge: 'Choose one website you use often. Name one way a person could perceive it and one way they could operate it without relying on sight or a mouse.',
         quiz: {
@@ -129,7 +129,7 @@ export const courseModules: CourseModule[] = [
   {
     id: 2,
     title: 'Accessible Content',
-    goal: 'Learn how everyday website content can create—or remove—barriers.',
+    goal: 'Learn how everyday website content can create or remove barriers.',
     color: '#ccff00',
     lessons: [
       {
@@ -139,7 +139,7 @@ export const courseModules: CourseModule[] = [
         title: 'What Is Alt Text?',
         minutes: 7,
         summary: 'Alternative text gives a concise, contextual description of an informative image to people who cannot see it.',
-        barrier: 'Without useful alt text, a screen reader may announce only a file name—or skip information the image was meant to communicate.',
+        barrier: 'Without useful alt text, a screen reader may announce only a file name or skip information the image was meant to communicate.',
         solution: 'Describe the image’s purpose in context. Use empty alt text for decoration and avoid repeating nearby text.',
         takeaways: ['Context determines good alt text.', 'Be concise and describe what matters.', 'Decorative images usually need empty alt text.'],
         challenge: 'Write alt text for a photo of a crowded bus stop used in an article about unreliable transit. Focus on why the image is there.',
@@ -193,7 +193,7 @@ export const courseModules: CourseModule[] = [
         title: 'Why Heading Structure Matters',
         minutes: 6,
         summary: 'Headings create an outline that helps everyone scan a page and lets screen-reader users navigate directly between sections.',
-        barrier: 'Text styled to look like a heading—but coded as a paragraph—does not appear in the page outline. Skipped levels can make relationships unclear.',
+        barrier: 'Text styled to look like a heading but coded as a paragraph does not appear in the page outline. Skipped levels can make relationships unclear.',
         solution: 'Use real heading elements in a logical hierarchy based on meaning, not on the visual size you want.',
         takeaways: ['Headings describe relationships between sections.', 'Use CSS for appearance and HTML for meaning.', 'A clear outline makes long pages easier to navigate.'],
         challenge: 'List the headings on one page without the body text. Does the outline still explain the page and its sections?',
@@ -602,7 +602,7 @@ export const courseModules: CourseModule[] = [
         sourceFolder: '28',
         title: 'What Is Switch Access?',
         minutes: 7,
-        summary: 'Switch access lets people operate a device with one or more switches while software moves—or scans—through available choices.',
+        summary: 'Switch access lets people operate a device with one or more switches while software moves, or scans, through available choices.',
         barrier: 'A long, illogical focus order, tiny targets, and mouse-only controls can make a short task exhausting or impossible with switch scanning.',
         solution: 'Keep navigation efficient and predictable, use semantic controls, group actions logically, and remove unnecessary focus stops.',
         takeaways: ['Scanning moves through choices in sequence.', 'Every extra focus stop adds effort.', 'Keyboard-accessible, semantic controls support switch access.'],
