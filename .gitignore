@@ -2,6 +2,9 @@ node_modules/
 build/
 dist/
 coverage/
+.sites-runtime/
+.sites-publish-checkout/
+tmp/
 .DS_Store
 *.log
 .env*
