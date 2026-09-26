@@ -6,11 +6,11 @@ const partnershipFormUrl = 'https://forms.gle/Db1hspzAnLF1UPjo7';
 const accessibilityGuideFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScNFpSDR5JRR5_elJldui6giG34PfRMZvvzag5_0ZHJEkMZfQ/viewform?usp=publish-editor';
 const accessibilityQuickStartUrl = '/OneWeb_Five_Simple_Accessibility_Checks_Accessible.pdf';
 const accessibilityGuidePreviewPages = [
-  '/digital-accessibility-guide-cover.png',
-  '/digital-accessibility-guide-first-page.png',
-  '/digital-accessibility-guide-page-3.png',
-  '/digital-accessibility-guide-page-4.png',
-  '/digital-accessibility-guide-page-5.png',
+  '/digital-accessibility-guide-cover.png?v=20260926',
+  '/digital-accessibility-guide-first-page.png?v=20260926',
+  '/digital-accessibility-guide-page-3.png?v=20260926',
+  '/digital-accessibility-guide-page-4.png?v=20260926',
+  '/digital-accessibility-guide-page-5.png?v=20260926',
 ];
 
 function AccessibilityGuideHero() {
