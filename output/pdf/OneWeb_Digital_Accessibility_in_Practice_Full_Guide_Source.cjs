@@ -1,0 +1,1745 @@
+const fs = require("fs");
+const path = require("path");
+const { chromium } = require("playwright");
+
+const root = path.resolve(__dirname, "..", "..");
+const outputDir = path.join(root, "output", "pdf");
+const htmlPath = path.join(
+  outputDir,
+  "OneWeb_Digital_Accessibility_in_Practice_Full_Guide.html"
+);
+const pdfPath =
+  process.env.FULL_GUIDE_PDF_PATH ||
+  path.join(
+    outputDir,
+    "OneWeb_Digital_Accessibility_in_Practice_Full_Guide.pdf"
+  );
+
+const asset = (name) =>
+  `file:///${path.join(root, "public", name).replace(/\\/g, "/")}`;
+// Print-optimized JPEG copies (200-360 KB) of the multi-megabyte PNG originals.
+const optAsset = (name) =>
+  `file:///${path
+    .join(root, "tmp", "pdfs", "optimized-assets", name)
+    .replace(/\\/g, "/")}`;
+
+const logo = asset("logoimage.png");
+const community = optAsset("oneweb-community-illustration.jpg");
+const everyday = optAsset("oneweb-everyday-access-illustration.jpg");
+const altText = optAsset("oneweb-alt-text-illustration.jpg");
+const captions = optAsset("oneweb-captions-illustration.jpg");
+const keyboard = optAsset("oneweb-keyboard-focus-illustration.jpg");
+
+// One entry per chapter; pages reference these by key so a chapter rename
+// happens in exactly one place. `accent` colors the header chip.
+const CHAPTERS = {
+  cover: { label: "OneWeb Movement / 2026", accent: "var(--ink)" },
+  start: { label: "Start here", accent: "var(--ink)" },
+  c1: { label: "01 / Understand access", accent: "var(--blue)" },
+  c2: { label: "02 / See and read", accent: "var(--orange)" },
+  c3: { label: "03 / Watch and listen", accent: "var(--ink)" },
+  c4: { label: "04 / Navigate and complete tasks", accent: "var(--blue-dark)" },
+  c5: { label: "05 / Publish and purchase", accent: "var(--orange-dark)" },
+  c6: { label: "06 / Test, plan, and sustain", accent: "var(--lime)" },
+};
+
+const pages = [
+  {
+    number: 1,
+    id: "cover",
+    ch: "cover",
+    title: "Digital Accessibility<br><span>in Practice</span>",
+    className: "cover-page",
+    body: `
+      <div class="cover-copy">
+        <p class="kicker">A practical resource guide</p>
+        <h1 id="title-cover">Digital<br>Accessibility<br><span class="hl">in Practice</span></h1>
+        <p class="cover-deck">A clear, action-oriented guide for businesses, nonprofits, schools, and community groups.</p>
+        <div class="cover-tags" aria-label="Guide topics">
+          <span>Understand</span><span>Check</span><span>Improve</span><span>Sustain</span>
+        </div>
+      </div>
+      <figure class="cover-art">
+        <img src="${community}" alt="A diverse group works together around a laptop while a presenter who uses a white cane points to accessibility symbols on a screen; one participant uses a wheelchair.">
+      </figure>
+      <div class="cover-ribbon">Access is part of the experience.</div>
+    `,
+  },
+  {
+    number: 2,
+    id: "start-here",
+    ch: "start",
+    title: "Use this guide without getting overwhelmed",
+    theme: "pale",
+    body: `
+      <div class="grid grid-5-7">
+        <div>
+          <p class="lead">You do not need to fix everything at once. Start with one important task, remove the barrier, and repeat.</p>
+          <div class="callout lime">
+            <p class="label">Choose a starting point</p>
+            <p>A restaurant might review its menu and ordering system. A clinic might test appointment scheduling. A nonprofit might begin with event registration and donations.</p>
+          </div>
+          <h3 class="after-callout">Each practice page answers four questions</h3>
+          <ol class="number-list">
+            <li><b>Why does this matter?</b></li>
+            <li><b>What can I check now?</b></li>
+            <li><b>What does better look like?</b></li>
+            <li><b>What should I send to the owner?</b></li>
+          </ol>
+          <div class="callout orange after-callout"><b>Short on time?</b> Read pages 26&#8211;29 first: priorities, the 30-day plan, and the barrier tracker. Come back to the practice chapters as questions come up.</div>
+        </div>
+        <nav class="toc" aria-label="Table of contents">
+          <h2>Inside the guide</h2>
+          <a href="#understand"><span>01</span><b>Understand access</b><small>Pages 3&#8211;9</small></a>
+          <a href="#see"><span>02</span><b>See and read</b><small>Pages 10&#8211;13</small></a>
+          <a href="#hear"><span>03</span><b>Watch and listen</b><small>Pages 14&#8211;15</small></a>
+          <a href="#operate"><span>04</span><b>Navigate and complete tasks</b><small>Pages 16&#8211;21</small></a>
+          <a href="#publish"><span>05</span><b>Publish and purchase</b><small>Pages 22&#8211;25</small></a>
+          <a href="#act"><span>06</span><b>Test, plan, and sustain</b><small>Pages 26&#8211;30</small></a>
+        </nav>
+      </div>
+      <p class="scope-note push-bottom"><b>Scope note:</b> This is a practical starting guide, not a complete audit or a substitute for applicable standards, qualified evaluation, user research, or legal advice.</p>
+    `,
+  },
+  {
+    number: 3,
+    id: "understand",
+    ch: "c1",
+    title: "What digital accessibility means",
+    theme: "blue",
+    body: `
+      <div class="definition">
+        <p>Digital accessibility means designing websites, applications, documents, media, and online services so people with disabilities can <b>perceive, understand, navigate, and interact with them independently.</b></p>
+      </div>
+      <div class="grid grid-3">
+        <article class="plain-card">
+          <p class="label orange-text">Perceive</p>
+          <h3>Receive the information</h3>
+          <p>Text can be read. Images have alternatives. Video has captions. Meaning is not conveyed only through color or sound.</p>
+          <small>Example: a menu is real text, not a photo of a menu.</small>
+        </article>
+        <article class="plain-card">
+          <p class="label orange-text">Understand</p>
+          <h3>Know what to do</h3>
+          <p>Instructions are clear. Navigation is predictable. Forms identify errors and explain how to correct them.</p>
+          <small>Example: an error says which field to fix and how.</small>
+        </article>
+        <article class="plain-card">
+          <p class="label orange-text">Navigate + interact</p>
+          <h3>Complete the task</h3>
+          <p>Controls work with a keyboard and assistive technology. Focus is visible. Time limits and motion do not create barriers.</p>
+          <small>Example: booking works without ever touching a mouse.</small>
+        </article>
+      </div>
+      <div class="bottom-statement push-bottom">
+        <span class="big-quote" aria-hidden="true">&#8220;</span>
+        <div class="quote-copy">
+          <p>The power of the Web is in its universality. Access by everyone regardless of disability is an essential aspect.</p>
+          <cite>Tim Berners-Lee, inventor of the World Wide Web</cite>
+        </div>
+      </div>
+    `,
+  },
+  {
+    number: 4,
+    id: "why-it-matters",
+    ch: "c1",
+    title: "Access is part of every important task",
+    theme: "white",
+    body: `
+      <p class="lead narrow">For many people, the website is the front door. A barrier can interrupt a task that affects health, education, work, money, participation, or belonging.</p>
+      <div class="task-path" role="list" aria-label="Examples of important digital tasks">
+        <div role="listitem"><b>Find</b><span>a menu, schedule, policy, or phone number</span></div>
+        <div role="listitem"><b>Decide</b><span>whether a service, event, or opportunity fits</span></div>
+        <div role="listitem"><b>Act</b><span>book, apply, register, buy, donate, or ask for help</span></div>
+        <div role="listitem"><b>Confirm</b><span>know the action succeeded and what happens next</span></div>
+      </div>
+      <div class="grid grid-2">
+        <article class="callout orange">
+          <p class="label">A barrier</p>
+          <h3>The appointment form cannot be used without a mouse.</h3>
+          <p>The customer cannot select a time or submit the request.</p>
+          <p class="impact-line"><b>The result:</b> a lost booking, a longer phone queue, and a person who plans around your website instead of with it.</p>
+        </article>
+        <article class="callout lime">
+          <p class="label">An accessible path</p>
+          <h3>The form works by keyboard and gives a clear confirmation.</h3>
+          <p>The customer completes the same task independently.</p>
+          <p class="impact-line"><b>The result:</b> the task is done in one visit, and the confirmation says exactly what happens next.</p>
+        </article>
+      </div>
+      <p class="endnote push-bottom">Accessibility improves access, clarity, resilience, and trust. It also reduces the cost of correcting the same barrier after it has spread across pages, documents, and campaigns.</p>
+    `,
+  },
+  {
+    number: 5,
+    id: "different-ways-1",
+    ch: "c1",
+    title: "People see and hear digital content differently",
+    theme: "white",
+    body: `
+      <div class="grid grid-2 profile-cards">
+        <article class="access-profile blue-card">
+          <div class="profile-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </div>
+          <h3>Someone may read by sound, braille, magnification, or customized colors.</h3>
+          <p>People who are blind may use a screen reader. People with low vision may zoom, magnify, enlarge text, or replace colors and fonts.</p>
+          <div class="helps-strip"><b>What helps</b><br>Real text alternatives, strong contrast, named controls, and layouts that hold together when enlarged.</div>
+          <div class="barrier-strip"><b>Common barriers</b><br>Missing text alternatives, low contrast, unlabeled controls, and layouts that break when enlarged.</div>
+        </article>
+        <article class="access-profile orange-card">
+          <div class="profile-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M7 10a5 5 0 0 1 10 0c0 3-2 4-3.5 5.7-.8.9-1.1 1.7-1.1 2.5A2.8 2.8 0 0 1 9.6 21 3.6 3.6 0 0 1 6 17.4"></path>
+              <path d="M10 10a2 2 0 1 1 4 0c0 1.3-.8 2-1.7 2.9"></path>
+            </svg>
+          </div>
+          <h3>Someone may depend on captions, transcripts, visual alerts, or sign language.</h3>
+          <p>Deaf and hard-of-hearing people may use text alternatives to speech and meaningful sound.</p>
+          <div class="helps-strip"><b>What helps</b><br>Accurate captions, complete transcripts, visual versions of audio alerts, and text-based ways to get support.</div>
+          <div class="barrier-strip"><b>Common barriers</b><br>Uncaptioned video, audio-only instructions, inaccurate auto-captions, and alerts communicated only through sound.</div>
+        </article>
+      </div>
+      <div class="remember push-bottom"><b>Remember:</b> Assistive technology can only communicate the structure and alternatives that the content provides.</div>
+    `,
+  },
+  {
+    number: 6,
+    id: "different-ways-2",
+    ch: "c1",
+    title: "People move, process, and communicate differently",
+    theme: "white",
+    body: `
+      <div class="profile-grid">
+        <article>
+          <span class="marker lime">01</span>
+          <div>
+            <h3>Motor access</h3>
+            <p>Someone may navigate with a keyboard, switch, voice control, eye tracking, head pointer, or adapted input device.</p>
+            <small>Watch for mouse-only controls, tiny targets, drag-only actions, short time limits, and keyboard traps.</small>
+          </div>
+        </article>
+        <article>
+          <span class="marker orange">02</span>
+          <div>
+            <h3>Cognitive + learning access</h3>
+            <p>Someone may benefit from clear language, visible instructions, consistent layouts, and the ability to pause or take more time.</p>
+            <small>Watch for vague instructions, dense text, unexpected changes, lost form data, and distracting motion.</small>
+          </div>
+        </article>
+        <article>
+          <span class="marker blue">03</span>
+          <div>
+            <h3>Speech access</h3>
+            <p>Someone may not be able to use voice-based support, phone systems, or voice identity checks.</p>
+            <small>Provide another effective way to communicate or verify identity.</small>
+          </div>
+        </article>
+        <article>
+          <span class="marker ink">04</span>
+          <div>
+            <h3>Temporary + situational access</h3>
+            <p>A broken arm, fatigue, glare, a noisy room, slow connection, or an eye or ear injury can change what someone needs.</p>
+            <small>Flexible design supports people whose needs change across a day or a lifetime.</small>
+          </div>
+        </article>
+      </div>
+      <div class="remember push-bottom"><b>One takeaway:</b> Design for flexibility. The same page is read by ear, by touch, by keyboard, and at very different sizes.</div>
+    `,
+  },
+  {
+    number: 7,
+    id: "everyday-scenarios",
+    ch: "c1",
+    title: "Three everyday access stories",
+    theme: "pale",
+    body: `
+      <figure class="figure-box wide-illustration" style="aspect-ratio:3/2" data-natural="1536x1024">
+        <img src="${everyday}" alt="Three people independently complete digital tasks: reading a restaurant menu with a screen reader, scheduling a clinic appointment by keyboard, and watching a captioned community event video.">
+      </figure>
+      <div class="scenario-captions">
+        <article><span class="marker lime">01</span><div><h3>Restaurant</h3><p>A blind customer uses a screen reader to find the menu and place an order.</p><p class="needs"><b>Needs:</b> text menu, logical headings, named buttons.</p></div></article>
+        <article><span class="marker lime">02</span><div><h3>Clinic</h3><p>A customer with limited hand movement schedules an appointment by keyboard.</p><p class="needs"><b>Needs:</b> visible focus, labeled fields, clear confirmation.</p></div></article>
+        <article><span class="marker lime">03</span><div><h3>Community event</h3><p>A Deaf visitor watches the event introduction with accurate captions.</p><p class="needs"><b>Needs:</b> captions, transcript, readable controls.</p></div></article>
+      </div>
+      <p class="endnote push-bottom">The same lesson three times: the barrier was never the person. It was a design choice&#8212;and every one of these choices can be made differently.</p>
+    `,
+  },
+  {
+    number: 8,
+    id: "pour",
+    ch: "c1",
+    title: "The four foundations: POUR",
+    theme: "black",
+    body: `
+      <p class="lead">The Web Content Accessibility Guidelines (WCAG) rest on four principles&#8212;<b>Perceivable, Operable, Understandable, and Robust</b>, remembered as POUR. Use them as a shared vocabulary, not as four isolated checklists.</p>
+      <div class="pour-grid">
+        <article><span class="lime" aria-hidden="true">P</span><div><h3>Perceivable</h3><p>People can receive the information.</p><small>Alt text, captions, contrast, adaptable structure.</small></div></article>
+        <article><span class="orange" aria-hidden="true">O</span><div><h3>Operable</h3><p>People can navigate and use the interface.</p><small>Keyboard access, visible focus, enough time, motion controls.</small></div></article>
+        <article><span class="lime" aria-hidden="true">U</span><div><h3>Understandable</h3><p>Information and interactions make sense.</p><small>Clear instructions, predictable patterns, useful errors.</small></div></article>
+        <article><span class="orange" aria-hidden="true">R</span><div><h3>Robust</h3><p>Content works across technologies.</p><small>Semantic structure, accurate names, roles, states, and values.</small></div></article>
+      </div>
+      <div class="standards-note push-bottom">
+        <h3>About conformance</h3>
+        <p>WCAG 2.2 includes testable success criteria at Levels A, AA, and AAA. Passing a few checks does not establish conformance for an entire site. Use this guide to begin; use the complete standard and qualified evaluation when assessing conformance.</p>
+      </div>
+    `,
+  },
+  {
+    number: 9,
+    id: "testing-layers",
+    ch: "c1",
+    title: "A useful test has more than one layer",
+    theme: "pale",
+    body: `
+      <p class="lead narrow">No single method finds every barrier. Combine three layers, and treat each one as evidence rather than a verdict.</p>
+      <div class="testing-stack" aria-label="Three layers of accessibility evaluation">
+        <article class="auto"><span>Fast signal</span><h3>Automated checks</h3><p>Find some code-based issues at scale: contrast failures, missing attributes, empty labels, and repeated patterns.</p><b>Cannot decide:</b> whether alt text is useful, focus order is logical, or a task is understandable.</article>
+        <article class="manual"><span>Human judgment</span><h3>Manual checks</h3><p>Review keyboard use, zoom, focus, forms, headings, media, and instructions&#8212;and complete real tasks.</p><b>Cannot replace:</b> the lived experience of disabled users.</article>
+        <article class="users"><span>Real experience</span><h3>Evaluation with disabled people</h3><p>Reveal barriers, workarounds, and confusing patterns that technical checks may miss.</p><b>Complements:</b> standards-based evaluation; it does not replace it.</article>
+      </div>
+      <div class="formula push-bottom"><b>Better evidence</b><span>automated signal</span><i aria-hidden="true">+</i><span>manual review</span><i aria-hidden="true">+</i><span>disabled user feedback</span></div>
+    `,
+  },
+  {
+    number: 10,
+    id: "see",
+    ch: "c2",
+    title: "Color contrast: make important text easy to read",
+    theme: "white",
+    body: `
+      <div class="grid grid-2">
+        <div class="contrast-stage">
+          <p class="label">Same message, two presentations</p>
+          <div class="contrast-demo">
+            <div class="faint"><div aria-hidden="true"><b>Important update</b><span>Registration closes Friday.</span></div><small><i class="chip fail">Fails</i> about 1.6:1 contrast</small></div>
+            <div class="clear"><div><b>Important update</b><span>Registration closes Friday.</span></div><small><i class="chip pass">Passes</i> about 17.9:1 contrast</small></div>
+          </div>
+        </div>
+        <div>
+          <p class="lead">Low contrast can make text difficult to distinguish, especially over images, in faint interface states, or on a screen affected by glare.</p>
+          <h3>Check these combinations</h3>
+          <ul class="checklist">
+            <li>Body text and its background</li>
+            <li>Text placed over photographs</li>
+            <li>Links, buttons, and form borders</li>
+            <li>Hover, focus, selected, error, and disabled states</li>
+          </ul>
+          <div class="mini-standard"><b>WCAG 2.2 Level AA contrast reference</b><br>Generally 4.5:1 for normal text and 3:1 for large text. Review the complete criterion before making a conformance claim.</div>
+          <div class="ratio-strip" aria-label="Contrast ratio quick reference">
+            <div><b>4.5:1</b><span>normal text</span></div>
+            <div><b>3:1</b><span>large text</span></div>
+            <div><b>3:1</b><span>icons + parts of controls</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="report-line push-bottom"><b>Copy into a report:</b> &#8220;The foreground and background colors may not provide sufficient contrast in the normal and interactive states. Please test every state and update the palette while preserving a visible focus indicator.&#8221;</div>
+    `,
+  },
+  {
+    number: 11,
+    id: "zoom-reflow",
+    ch: "c2",
+    title: "Can the page adapt without losing information?",
+    theme: "white",
+    body: `
+      <p class="lead narrow">&#8220;Reflow&#8221; means enlarged content rearranges into one readable column instead of forcing sideways scrolling. Use the three checks below to make sure nothing is lost when a page is enlarged, resized, or read without color.</p>
+      <div class="reflow-comparison" aria-label="Before and after example of a webpage at 200 percent zoom in a narrow window">
+        <article class="reflow-state before-state">
+          <div class="state-label"><b>Before</b><span class="chip before">Problem</span></div>
+          <div class="mock-browser">
+            <div class="mock-top" aria-hidden="true"><i></i><i></i><i></i><span>200% zoom</span></div>
+            <div class="clip-window" aria-hidden="true">
+              <div class="wide-content">
+                <small>Menu &nbsp; Services &nbsp; Contact</small>
+                <h3>Information is cut off and controls overlap.</h3>
+                <p class="wide-line">The paragraph runs past the window edge, so readers must scroll sideways for every line.</p>
+                <button type="button" tabindex="-1">Continue</button>
+              </div>
+            </div>
+          </div>
+          <p class="state-result">Clipped text, overlap, and horizontal scrolling</p>
+        </article>
+        <article class="reflow-state after-state">
+          <div class="state-label"><b>After</b><span class="chip after">Reflows</span></div>
+          <div class="mock-browser">
+            <div class="mock-top" aria-hidden="true"><i></i><i></i><i></i><span>200% zoom</span></div>
+            <div class="good-content" aria-hidden="true">
+              <small>Menu &nbsp; Services &nbsp; Contact</small>
+              <h3>Information stays readable.</h3>
+              <p>Text wraps into one column and controls remain usable.</p>
+              <p>Nothing overlaps, disappears, or requires sideways scrolling.</p>
+              <button type="button" tabindex="-1">Continue</button>
+            </div>
+          </div>
+          <p class="state-result">No information or functionality is lost</p>
+        </article>
+      </div>
+      <div class="grid grid-3 adapt-checks push-bottom">
+        <article class="adapt-check">
+          <span class="marker lime">01</span>
+          <h3>Zoom to 200%</h3>
+          <p>Confirm that text remains readable and every control remains available.</p>
+        </article>
+        <article class="adapt-check">
+          <span class="marker orange">02</span>
+          <h3>Resize the window</h3>
+          <p>Confirm that content wraps without overlap, clipping, or horizontal scrolling.</p>
+        </article>
+        <article class="adapt-check">
+          <span class="marker blue">03</span>
+          <h3>Check color cues</h3>
+          <p>Confirm that errors and selected states also include text, an icon, or another visible indicator.</p>
+          <div class="error-demo" aria-label="Accessible form error example">
+            <b class="demo-label">Accessible error example</b>
+            <span class="field-label">Email address</span>
+            <div class="field-mock" aria-hidden="true"></div>
+            <p class="error-message"><strong aria-hidden="true">!</strong> Enter your email address.</p>
+          </div>
+        </article>
+      </div>
+    `,
+  },
+  {
+    number: 12,
+    id: "image-purpose",
+    ch: "c2",
+    title: "Write alternative text for the image&#8217;s purpose",
+    theme: "pale",
+    body: `
+      <p class="lead narrow">Alternative text communicates the information or purpose of an image when the image is not seen.</p>
+      <figure class="figure-box centered-figure" style="width:5.4in;aspect-ratio:4/3" data-natural="1448x1086">
+        <img src="${altText}" alt="An illustrator adds a concise text description to a mountain image on a computer.">
+      </figure>
+      <div class="grid grid-2 image-text-layout">
+        <div>
+          <h3>Two attempts, one image</h3>
+          <div class="alt-example weak"><span><i class="chip before">Weak</i></span><code>image123.jpg</code></div>
+          <div class="alt-example useful"><span><i class="chip after">Contextual</i></span><p>&#8220;Volunteer demonstrates the accessible check-in tablet at the community event.&#8221;</p></div>
+        </div>
+        <div>
+          <h3>Ask before you write</h3>
+          <ol class="number-list tight">
+            <li>What job is this image doing here?</li>
+            <li>Is the same information already nearby?</li>
+            <li>Does the image perform an action?</li>
+            <li>Would details require a longer explanation?</li>
+          </ol>
+        </div>
+      </div>
+      <div class="callout lime push-bottom"><b>Write for context.</b> The same photograph may need different alternative text on a staff page, an event recap, and a product page.</div>
+    `,
+  },
+  {
+    number: 13,
+    id: "image-types",
+    ch: "c2",
+    title: "What job is the image doing?",
+    theme: "white",
+    body: `
+      <p class="lead narrow">Before writing alternative text, identify the job the image is doing. Start at the top and use the first description that fits.</p>
+      <div class="image-decision-list">
+        <article>
+          <div class="decision-symbol orange-symbol" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><circle cx="21" cy="21" r="12"></circle><path d="m30 30 10 10"></path></svg>
+          </div>
+          <div class="decision-question"><p class="label orange-text">Functional image</p><h3>Does it perform an action?</h3><p>Example: a magnifying-glass image is the button that opens search.</p></div>
+          <div class="decision-answer"><b>Name the action</b><p>Describe what happens when it is selected&#8212;not what the icon looks like.</p><code>alt="Search"</code></div>
+        </article>
+        <article>
+          <div class="decision-symbol blue-symbol" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><path d="M8 39V23h8v16M20 39V14h8v25M32 39V7h8v32"></path><path d="M6 39h36"></path></svg>
+          </div>
+          <div class="decision-question"><p class="label orange-text">Complex image</p><h3>Is it a chart, map, or diagram?</h3><p>Example: a chart compares enrollment across four years.</p></div>
+          <div class="decision-answer"><b>Provide two levels</b><p>Identify it briefly, then provide the main message and detailed values nearby.</p><code>alt="Four-year enrollment chart"</code></div>
+        </article>
+        <article>
+          <div class="decision-symbol lime-symbol" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><path d="M6 38 18 22l8 9 6-7 10 14Z"></path><circle cx="34" cy="13" r="5"></circle></svg>
+          </div>
+          <div class="decision-question"><p class="label orange-text">Informative image</p><h3>Does it communicate useful information?</h3><p>Example: an event photograph shows a volunteer using an accessible tablet.</p></div>
+          <div class="decision-answer"><b>Describe what matters</b><p>Write the information or purpose that is important in this specific context.</p><code>alt="Volunteer demonstrates the accessible check-in tablet"</code></div>
+        </article>
+        <article>
+          <div class="decision-symbol black-symbol" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><path d="m24 5 3.8 11.2L39 20l-11.2 3.8L24 35l-3.8-11.2L9 20l11.2-3.8Z"></path><path d="m38 31 1.8 5.2L45 38l-5.2 1.8L38 45l-1.8-5.2L31 38l5.2-1.8Z"></path></svg>
+          </div>
+          <div class="decision-question"><p class="label orange-text">Decorative image</p><h3>Would removing it change nothing?</h3><p>Example: a flourish or background shape repeats no necessary information.</p></div>
+          <div class="decision-answer"><b>Let screen readers skip it</b><p>Keep it available visually but give it an empty alternative.</p><code>alt=""</code></div>
+        </article>
+      </div>
+      <div class="purpose-takeaway push-bottom"><b>Alternative text should match purpose&#8212;not merely describe appearance.</b><span>The same image may need different text in a different context.</span></div>
+    `,
+  },
+  {
+    number: 14,
+    id: "hear",
+    ch: "c3",
+    title: "Captions and transcripts preserve the message",
+    theme: "black",
+    body: `
+      <figure class="figure-box framed-light" style="aspect-ratio:1672/941" data-natural="1672x941">
+        <img src="${captions}" alt="A presenter appears in a video call with a caption area and an audio waveform.">
+      </figure>
+      <div class="callout lime"><b>Start with auto-captions; finish with human review.</b> Automatic output can be useful, but it often misses names, accents, punctuation, and specialized language.</div>
+      <div class="caption-guidance push-bottom">
+        <article>
+          <h3>Captions</h3>
+          <p>Synchronized text that plays with the video, representing speech and meaningful sound as they happen.</p>
+          <ul class="checklist">
+            <li>Review names and technical terms</li>
+            <li>Identify speakers when needed</li>
+            <li>Include meaningful sounds</li>
+            <li>Use readable punctuation and timing</li>
+            <li>Keep captions clear of essential visuals</li>
+          </ul>
+        </article>
+        <article>
+          <h3>Transcripts</h3>
+          <p>A separate text version of the full content. It supports search, translation, quiet settings, and people who prefer reading.</p>
+          <p>A transcript complements captions; it does not always replace synchronized captions in video.</p>
+        </article>
+      </div>
+    `,
+  },
+  {
+    number: 15,
+    id: "audio-motion",
+    ch: "c3",
+    title: "Make visual action, controls, and motion understandable",
+    theme: "pale",
+    body: `
+      <div class="grid grid-3 media-practices">
+        <article>
+          <div class="practice-icon lime" aria-hidden="true">AD</div>
+          <h3>Describe essential visuals</h3>
+          <p>If a video communicates necessary information visually that is not explained in the existing audio, add audio description or integrate the information into the narration.</p>
+          <small>Example: say which control is selected, not only &#8220;complete these steps.&#8221;</small>
+        </article>
+        <article>
+          <div class="practice-icon orange" aria-hidden="true">&#9654;</div>
+          <h3>Make controls operable</h3>
+          <p>People should be able to play, pause, adjust volume, enable captions, stop autoplaying audio, and find controls when zoomed.</p>
+          <small>Test controls by keyboard and with assistive technology.</small>
+        </article>
+        <article>
+          <div class="practice-icon blue" aria-hidden="true">&#10073;&#10073;</div>
+          <h3>Control motion</h3>
+          <p>Avoid unnecessary flashing. Give people a way to pause significant animation, scrolling, blinking, or automatic updates.</p>
+          <small>Respect reduced-motion preferences where possible.</small>
+        </article>
+      </div>
+      <div class="callout orange"><b>Autoplay rule of thumb:</b> nothing should start moving or making sound on its own without an obvious, keyboard-reachable way to stop it.</div>
+      <div class="story-strip push-bottom"><b>One content review, three questions</b><span>Can the message be understood without hearing?</span><span>Can essential visuals be understood without seeing?</span><span>Can the experience be controlled?</span></div>
+    `,
+  },
+  {
+    number: 16,
+    id: "operate",
+    ch: "c4",
+    title: "Keyboard access: follow the same path without a mouse",
+    theme: "blue",
+    body: `
+      <figure class="figure-box framed-light" style="aspect-ratio:1672/941" data-natural="1672x941">
+        <img src="${keyboard}" alt="A person who uses a wheelchair and a wrist support navigates a website by keyboard while a bright focus outline marks the selected card on the monitor.">
+      </figure>
+      <p class="lead">Some people cannot use a mouse or touchscreen precisely. Every important task should work with a keyboard or keyboard-like input.</p>
+      <div class="key-row" aria-label="Common keyboard controls">
+        <div><kbd>Tab</kbd><span>move forward</span></div>
+        <div><kbd>Shift + Tab</kbd><span>move backward</span></div>
+        <div><kbd>Enter</kbd><span>activate links</span></div>
+        <div><kbd>Space</kbd><span>activate buttons</span></div>
+        <div><kbd>Esc</kbd><span>close many dialogs</span></div>
+      </div>
+      <div class="quick-row" aria-label="Five-minute keyboard check">
+        <div class="qr-title">Five-minute path</div>
+        <div><b>1</b>Put the mouse out of reach</div>
+        <div><b>2</b>Tab through the whole page</div>
+        <div><b>3</b>Complete one real task</div>
+        <div><b>4</b>Return without getting stuck</div>
+      </div>
+      <div class="report-line on-blue push-bottom"><b>Copy into a report:</b> &#8220;The [control] cannot be reached or activated using a keyboard. Please implement standard keyboard behavior and confirm a visible focus indicator.&#8221;</div>
+    `,
+  },
+  {
+    number: 17,
+    id: "focus",
+    ch: "c4",
+    title: "Visible focus, logical order, and no traps",
+    theme: "white",
+    body: `
+      <p class="lead narrow">Keyboard users watch the focus indicator the way mouse users watch the pointer. Follow it through this five-minute check: put the mouse aside, press <kbd>Tab</kbd>, and complete one real task.</p>
+      <div class="focus-demo">
+        <div class="mock-nav" aria-label="Example navigation with a focused item"><span>Services</span><span class="focused">Book an appointment</span><span>Contact</span></div>
+        <div class="focus-arrow" aria-hidden="true">&#8594;</div>
+        <div class="mock-dialog" aria-label="Example dialog with managed focus"><b>Appointment request</b><p>Name</p><div class="input-mock" aria-hidden="true"></div><button tabindex="-1">Continue</button><small>Focus enters the dialog, follows the form, and returns to the trigger when closed.</small></div>
+      </div>
+      <div class="grid grid-3 compact">
+        <article><h3><span class="marker lime">01</span> Visible</h3><p>You can always tell which element will receive the next keypress.</p><small>Check: an outline appears on every link, button, and field.</small></article>
+        <article><h3><span class="marker lime">02</span> Logical</h3><p>Focus generally follows the reading and visual order, including inside dialogs.</p><small>Check: tab through once; focus never jumps somewhere surprising.</small></article>
+        <article><h3><span class="marker lime">03</span> Escapable</h3><p>Focus does not become trapped in a menu, widget, embedded frame, or media player.</p><small>Check: Esc or Tab always leads out of whatever was opened.</small></article>
+      </div>
+      <div class="callout orange"><b>Custom control warning:</b> A styled <code>&lt;div&gt;</code> does not automatically behave like a button. Prefer native controls; if a custom component is necessary, provide the correct name, role, state, keyboard behavior, and focus management.</div>
+      <div class="report-line push-bottom"><b>Copy into a report:</b> &#8220;While tabbing through the page, the focus indicator disappears after the [element], and the focus order skips the [control]. Please restore a visible indicator and a logical order.&#8221;</div>
+    `,
+  },
+  {
+    number: 18,
+    id: "forms-labels",
+    ch: "c4",
+    title: "Forms: label the task before asking for input",
+    theme: "pale",
+    body: `
+      <div class="grid grid-2 form-layout">
+        <form class="form-demo" aria-label="Illustrative accessible appointment form">
+          <p class="label">Appointment request</p>
+          <label for="sample-name">Full name <span aria-hidden="true">*</span></label>
+          <input id="sample-name" value="" placeholder="Example: Jordan Lee" disabled>
+          <label for="sample-email">Email address <span aria-hidden="true">*</span></label>
+          <input id="sample-email" value="" placeholder="name@example.com" disabled>
+          <label for="sample-phone">Phone number <span class="optional">(optional)</span></label>
+          <input id="sample-phone" value="" placeholder="Example: 555-201-7788" disabled>
+          <label for="sample-date">Preferred day</label>
+          <input id="sample-date" value="" placeholder="Example: Tuesday morning" disabled>
+          <p class="form-help">Required fields are marked with an asterisk. Nothing is submitted from this printed example.</p>
+          <button type="button" tabindex="-1">Request appointment</button>
+        </form>
+        <div>
+          <p class="lead">A form should explain what belongs in each field, what is required, and what will happen next.</p>
+          <ul class="checklist large">
+            <li><b>Permanent labels</b> remain visible while the person types.</li>
+            <li><b>Instructions</b> appear before they are needed.</li>
+            <li><b>Required status</b> is communicated in text, not color alone.</li>
+            <li><b>Formats</b> include a useful example when necessary.</li>
+            <li><b>Buttons</b> describe the result: &#8220;Request appointment,&#8221; not &#8220;Submit.&#8221;</li>
+          </ul>
+          <div class="callout lime"><b>Placeholder text is a hint, not a label.</b> It disappears, may have low contrast, and can be confused with entered data.</div>
+        </div>
+      </div>
+      <div class="report-line push-bottom"><b>Copy into a report:</b> &#8220;The [field] has no visible label, and required fields are marked only by color. Please add permanent labels and a text indication of required status.&#8221;</div>
+    `,
+  },
+  {
+    number: 19,
+    id: "forms-errors",
+    ch: "c4",
+    title: "Errors should point to a solution",
+    theme: "white",
+    body: `
+      <div class="grid grid-2">
+        <article class="error-example weak-error">
+          <p class="label"><i class="chip before">Hard to recover</i></p>
+          <div aria-hidden="true">
+            <div class="field-line">Email</div>
+            <div class="fake-input red-border"></div>
+            <p class="red-text">Invalid.</p>
+          </div>
+          <small>The message is vague, relies on color, and does not explain the expected format. The person is stuck.</small>
+        </article>
+        <article class="error-example good-error">
+          <p class="label"><i class="chip after">Clear recovery</i></p>
+          <div class="field-line">Email address</div>
+          <div class="fake-input ink-border"></div>
+          <p class="good-error-message"><b>Error:</b> Enter an email address in the format name@example.com.</p>
+          <small>The message identifies the field, names the problem, and gives a correction.</small>
+        </article>
+      </div>
+      <div class="recovery-path" aria-label="Accessible form recovery sequence">
+        <span><b>1</b>Identify the field</span><span><b>2</b>Explain the problem</span><span><b>3</b>Preserve correct data</span><span><b>4</b>Move attention to the error</span><span><b>5</b>Confirm success</span>
+      </div>
+      <div class="grid grid-2 compact">
+        <div><h3>Time and interruption</h3><p>Avoid unnecessary time limits. When timing is essential, warn people and provide an extension when appropriate.</p></div>
+        <div><h3>Confirmation</h3><p>After submission, confirm that the action succeeded, summarize what was received, and explain what happens next.</p></div>
+      </div>
+      <div class="report-line push-bottom"><b>Copy into a report:</b> &#8220;The error message &#8216;Invalid.&#8217; does not identify the field, the problem, or the correction, and the only indicator is color. Please state what to fix and how, in text.&#8221;</div>
+    `,
+  },
+  {
+    number: 20,
+    id: "structure",
+    ch: "c4",
+    title: "Structure helps people scan and navigate",
+    theme: "blue",
+    body: `
+      <div class="structure-map">
+        <div class="browser-title">Appointments | Green Valley Clinic</div>
+        <div class="mock-landmarks" aria-hidden="true"><span>NAV</span><i>Home</i><i>Services</i><i>Appointments</i><i>Contact</i></div>
+        <div class="h1-node"><span>H1</span>Appointments</div>
+        <div class="structure-columns">
+          <div><span>H2</span><b>Book a visit</b><p>Instructions</p><ul><li>Choose a service</li><li>Select a date</li><li>Confirm by email</li></ul></div>
+          <div><span>H2</span><b>Prepare for your visit</b><p>Documents</p><table><tr><th>Form</th><th>Due</th></tr><tr><td>History</td><td>Before visit</td></tr><tr><td>Insurance card</td><td>Day of visit</td></tr></table></div>
+        </div>
+      </div>
+      <div class="grid grid-3 compact card-row">
+        <article><h3>Page title</h3><p>Identifies the page in browser tabs and history.</p></article>
+        <article><h3>Headings</h3><p>Represent the content hierarchy; do not choose levels only for visual size.</p></article>
+        <article><h3>Lists + tables</h3><p>Use real list structure for groups and tables for data relationships, with identified headers.</p></article>
+      </div>
+      <div class="remember push-bottom"><b>Also identify page language.</b> Screen readers use it to choose appropriate pronunciation.</div>
+    `,
+  },
+  {
+    number: 21,
+    id: "clear-content",
+    ch: "c4",
+    title: "Write links and instructions that make sense alone",
+    theme: "white",
+    body: `
+      <div class="before-after">
+        <article class="ba-before">
+          <p class="label"><i class="chip before">Weak</i></p>
+          <h3><a href="#clear-content">Click here</a></h3>
+          <p>Select the green button on the right.</p>
+        </article>
+        <div aria-hidden="true">&#8594;</div>
+        <article class="ba-after">
+          <p class="label"><i class="chip after">More useful</i></p>
+          <h3><a href="#clear-content">Download the patient registration form</a></h3>
+          <p>Select <b>Continue to payment</b>.</p>
+        </article>
+      </div>
+      <div class="grid grid-2">
+        <div>
+          <h3>Meaningful links</h3>
+          <p>Link text should identify its destination or action when read without the surrounding sentence. Avoid identical link text for different destinations.</p>
+          <h3>Predictable navigation</h3>
+          <p>Repeated navigation, search, help, and controls should remain reasonably consistent across pages.</p>
+        </div>
+        <div>
+          <h3>Plain, direct language</h3>
+          <ul class="checklist">
+            <li>Use familiar words when possible.</li>
+            <li>Explain necessary technical terms.</li>
+            <li>Present steps in the order completed.</li>
+            <li>Expand acronyms the first time.</li>
+            <li>Avoid relying only on color, shape, sound, or position.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="link-swap" aria-label="Link text to avoid and better alternatives">
+        <div><b>Instead of</b><span>&#8220;Click here&#8221; &#183; &#8220;Learn more&#8221; &#183; &#8220;Read this&#8221;</span></div>
+        <div><b>Try</b><span>&#8220;Download the form&#8221; &#183; &#8220;Start your application&#8221; &#183; &#8220;Contact the clinic&#8221;</span></div>
+      </div>
+      <div class="report-line"><b>Copy into a report:</b> &#8220;Several links on the page read only &#8216;click here&#8217; or &#8216;learn more.&#8217; Please rewrite each link so it names its destination or action.&#8221;</div>
+      <div class="callout lime push-bottom"><b>Quick test:</b> Scan only the headings, links, and buttons. Can you predict the page structure and the result of each action?</div>
+    `,
+  },
+  {
+    number: 22,
+    id: "publish",
+    ch: "c5",
+    title: "Accessible documents begin in the source",
+    theme: "blue",
+    body: `
+      <div class="doc-flow" aria-label="Accessible document workflow">
+        <div><span class="marker lime">01</span><h3>Structure the source</h3><p>Use heading styles, real lists, table headers, descriptive links, and meaningful document titles.</p><small>Where: the Styles panel, list buttons, and table header row settings.</small></div>
+        <div><span class="marker orange">02</span><h3>Add alternatives</h3><p>Describe meaningful images, preserve readable contrast, and establish a logical reading order.</p><small>Where: the alt-text pane and your tool&#8217;s color and order settings.</small></div>
+        <div><span class="marker lime">03</span><h3>Export carefully</h3><p>Use an accessible export path. Do not print to PDF when it removes document structure.</p><small>Where: &#8220;Save as PDF&#8221; with tagging on&#8212;not &#8220;Print to PDF.&#8221;</small></div>
+        <div><span class="marker orange">04</span><h3>Test the final file</h3><p>Run the checker, inspect tags and order, and navigate the exported file by keyboard&#8212;not only the source.</p><small>Where: the built-in accessibility checker, then a real read-through.</small></div>
+      </div>
+      <div class="grid grid-2">
+        <article class="callout orange">
+          <p class="label">Common barrier</p>
+          <h3>A scanned menu or form is only an image.</h3>
+          <p>It may be unreadable to a screen reader and difficult to enlarge or reflow.</p>
+        </article>
+        <article class="callout lime">
+          <p class="label">Better path</p>
+          <h3>Publish the information as accessible web text.</h3>
+          <p>If a document is needed, provide a properly structured version and verify the exported file.</p>
+        </article>
+      </div>
+      <p class="endnote on-blue push-bottom">The guide you are reading follows the same path: structured source, described images, tagged export, and a tested final file.</p>
+    `,
+  },
+  {
+    number: 23,
+    id: "social",
+    ch: "c5",
+    title: "Social posts and flyers need the information outside the image",
+    theme: "white",
+    body: `
+      <div class="grid grid-5-7 social-layout">
+        <div class="social-stage">
+          <div class="social-post">
+            <div class="social-head"><span class="social-avatar" aria-hidden="true">1W</span><b>OneWeb</b></div>
+            <div class="flyer-mock" role="img" aria-label="Example flyer image reading Community Access Workshop"><span aria-hidden="true">COMMUNITY<br>ACCESS<br>WORKSHOP</span></div>
+            <p><b>Community Access Workshop</b><br>September 18, 6:00 p.m.<br>Central Library + online<br>Free registration: oneweb.social</p>
+            <p class="post-alt-note"><b>alt:</b> Community Access Workshop flyer; all details are in this post.</p>
+          </div>
+        </div>
+        <div>
+          <p class="lead">A person should not have to see a graphic to learn the event name, date, time, location, cost, registration path, or accommodation contact.</p>
+          <ul class="checklist large">
+            <li>Add platform alternative text to meaningful images.</li>
+            <li>Caption video and review accuracy.</li>
+            <li>Repeat essential flyer information in the post or webpage.</li>
+            <li>Use CamelCase for multiword hashtags, such as <b>#DigitalAccessibility</b>.</li>
+            <li>Put the important message before a long group of hashtags.</li>
+            <li>Use emoji thoughtfully and avoid long repeated sequences.</li>
+          </ul>
+          <div class="callout lime"><b>Publishing check:</b> Read the post without viewing the image. Can someone still understand and act?</div>
+          <h3 class="after-callout">Add an access line to every event post</h3>
+          <div class="access-line-example">
+            <p class="label">Example</p>
+            <p>&#8220;Captions and ASL interpretation provided. For other access requests, email <b>access@oneweb.social</b> by September 11.&#8221;</p>
+            <small>Naming a contact and a date turns &#8220;accommodations available&#8221; from a slogan into a plan.</small>
+          </div>
+        </div>
+      </div>
+    `,
+  },
+  {
+    number: 24,
+    id: "vendors",
+    ch: "c5",
+    title: "Third-party tools are part of your experience",
+    theme: "pale",
+    body: `
+      <div class="vendor-flow" aria-label="An organization depends on external services">
+        <div class="org-node">Your organization</div>
+        <span aria-hidden="true">&#8594;</span>
+        <div><b>Scheduling</b><small>Can a time be picked by keyboard?</small></div>
+        <div><b>Payments</b><small>Do errors explain the fix?</small></div>
+        <div><b>Donations</b><small>Does zoom keep the form usable?</small></div>
+        <div><b>Events</b><small>Are tickets screen-reader friendly?</small></div>
+        <div><b>Chat</b><small>Is there a non-chat alternative?</small></div>
+        <div><b>Maps</b><small>Is the address also plain text?</small></div>
+      </div>
+      <div class="grid grid-2">
+        <div>
+          <h3>Ask before you buy or renew</h3>
+          <ul class="checklist">
+            <li>Can the complete service be used by keyboard?</li>
+            <li>Has it been evaluated against WCAG 2.2?</li>
+            <li>Is current accessibility documentation available?</li>
+            <li>How are barriers reported, prioritized, and corrected?</li>
+            <li>Are disabled people included in evaluation?</li>
+            <li>What changes when the product is customized?</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Do not stop at a promise</h3>
+          <p>Request evidence, test a realistic workflow, include accessibility expectations in the agreement, identify an escalation contact, and track defects after launch.</p>
+          <div class="callout orange"><b>If replacement cannot happen immediately:</b> provide an effective alternative way to complete the task, communicate it clearly, and create a time-bound plan to address the underlying barrier.</div>
+        </div>
+      </div>
+      <div class="report-line"><b>Copy into a vendor email:</b> &#8220;Before we renew, please share current accessibility documentation for the version we use, and confirm that [our key task] can be completed by keyboard and with a screen reader. We would like a named contact for accessibility issues.&#8221;</div>
+      <div class="report-line push-bottom"><b>Procurement note:</b> An accessibility conformance report can inform review, but it does not replace product testing in the configuration your audience will use.</div>
+    `,
+  },
+  {
+    number: 25,
+    id: "ownership",
+    ch: "c5",
+    title: "Accessibility is a workflow, not one person&#8217;s cleanup job",
+    theme: "white",
+    body: `
+      <p class="lead narrow">Every role touches access. When each role owns its part of the workflow, barriers stop reappearing faster than they can be fixed.</p>
+      <div class="role-lanes">
+        <article><span class="lime">Leaders</span><b>Set scope, goals, ownership, and resources.</b><small>Approve policy. Review progress. Remove blockers.</small></article>
+        <article><span class="orange">Content</span><b>Write clear copy and provide meaningful alternatives.</b><small>Use headings, links, alt text, captions, and accessible documents.</small></article>
+        <article><span class="blue">Design</span><b>Create readable, flexible, predictable patterns.</b><small>Check contrast, focus, zoom, motion, errors, and component states.</small></article>
+        <article><span class="lime">Development</span><b>Implement semantic, operable interfaces.</b><small>Use native controls, names, roles, states, keyboard behavior, and testing.</small></article>
+        <article><span class="orange">QA + users</span><b>Test tasks and verify corrections.</b><small>Combine automated, manual, and disabled-user evaluation.</small></article>
+        <article><span class="blue">Procurement</span><b>Require evidence and track vendor barriers.</b><small>Test before purchase and maintain an escalation path.</small></article>
+      </div>
+      <p class="endnote"><b>Make feedback visible:</b> publish a contact method for accessibility problems, acknowledge reports, explain next steps, and communicate when the issue is resolved.</p>
+      <div class="workflow-loop push-bottom" aria-label="Continuous accessibility workflow"><b>Plan</b><span aria-hidden="true">&#8594;</span><b>Create</b><span aria-hidden="true">&#8594;</span><b>Check</b><span aria-hidden="true">&#8594;</span><b>Publish</b><span aria-hidden="true">&#8594;</span><b>Listen</b><span aria-hidden="true">&#8594;</span><b>Improve</b></div>
+    `,
+  },
+  {
+    number: 26,
+    id: "act",
+    ch: "c6",
+    title: "Start with priority tasks, then rank the barriers",
+    theme: "black",
+    body: `
+      <div class="grid grid-5-7">
+        <div>
+          <p class="lead">Begin with the pages and processes people rely on most&#8212;not the pages that are easiest to test.</p>
+          <ul class="priority-tasks">
+            <li>Navigation + contact</li><li>Service information</li><li>Scheduling</li><li>Registration</li><li>Checkout + payment</li><li>Applications</li><li>Documents</li><li>Support</li>
+          </ul>
+          <p class="tasks-note">Test each one in the configuration your audience actually uses&#8212;on a phone, zoomed in, and with assistive technology.</p>
+        </div>
+        <div class="priority-ladder">
+          <article class="critical"><b>Critical</b><div><i class="tier-chip">Fix now</i><span>Prevents completion of an essential task.</span></div></article>
+          <article class="high"><b>High</b><div><i class="tier-chip">Next</i><span>Creates serious difficulty or blocks important information.</span></div></article>
+          <article class="medium"><b>Medium</b><div><i class="tier-chip">Soon</i><span>Creates confusion, delay, or additional effort.</span></div></article>
+          <article class="lower"><b>Lower</b><div><i class="tier-chip">Schedule</i><span>An improvement that should be scheduled and tracked.</span></div></article>
+        </div>
+      </div>
+      <div class="standards-note push-bottom">
+        <h3>Priority is not permission to ignore</h3>
+        <p>Fix simple barriers when you can, even if they are not critical. Rank work so essential tasks are restored quickly while every known barrier remains visible and owned.</p>
+      </div>
+    `,
+  },
+  {
+    number: 27,
+    id: "plan-weeks-1-2",
+    ch: "c6",
+    title: "30-day plan: weeks 1 and 2",
+    theme: "white",
+    body: `
+      <div class="plan-header"><span>Day 01</span><div aria-hidden="true"></div><span>Day 14</span></div>
+      <p class="plan-intro">The first half of the plan makes barriers visible: name an owner, choose the pages that matter, and correct the content problems you can reach today.</p>
+      <div class="grid grid-2 plan-grid">
+        <article class="plan-week lime-top">
+          <p class="label">Week 1</p>
+          <h3>Understand + inventory</h3>
+          <ul class="action-list">
+            <li><b>Assign an owner</b><span>Name the person coordinating accessibility work.</span></li>
+            <li><b>Choose ten priority pages</b><span>Focus on the tasks people rely on most.</span></li>
+            <li><b>List external services</b><span>Include forms, payments, scheduling, chat, and documents.</span></li>
+            <li><b>Run a baseline review</b><span>Combine automated checks with keyboard, zoom, content, and form review.</span></li>
+          </ul>
+          <div class="deliverable"><b>Deliverable:</b> a priority-page inventory with named owners.</div>
+        </article>
+        <article class="plan-week orange-top">
+          <p class="label">Week 2</p>
+          <h3>Correct content barriers</h3>
+          <ul class="action-list">
+            <li><b>Improve alternatives</b><span>Fix missing or unclear alt text.</span></li>
+            <li><b>Review captions</b><span>Correct names, terms, timing, and meaningful sounds.</span></li>
+            <li><b>Strengthen structure</b><span>Repair headings, links, lists, and document order.</span></li>
+            <li><b>Replace image-only information</b><span>Publish essential text in an accessible format.</span></li>
+          </ul>
+          <div class="deliverable"><b>Deliverable:</b> a documented first round of content corrections.</div>
+        </article>
+      </div>
+    `,
+  },
+  {
+    number: 28,
+    id: "plan-weeks-3-4",
+    ch: "c6",
+    title: "30-day plan: weeks 3 and 4",
+    theme: "pale",
+    body: `
+      <div class="plan-header"><span>Day 15</span><div aria-hidden="true"></div><span>Day 30</span></div>
+      <p class="plan-intro">The second half makes the work stick: test real interactions, hold vendors to the same bar, and build the checks into how you publish.</p>
+      <div class="grid grid-2 plan-grid">
+        <article class="plan-week blue-top">
+          <p class="label">Week 3</p>
+          <h3>Review interaction</h3>
+          <ul class="action-list">
+            <li><b>Complete keyboard paths</b><span>Check focus, order, traps, menus, and dialogs.</span></li>
+            <li><b>Inspect forms</b><span>Review labels, instructions, errors, timing, and confirmation.</span></li>
+            <li><b>Test high-value services</b><span>Use realistic scheduling, payment, registration, and donation scenarios.</span></li>
+            <li><b>Contact vendors</b><span>Share evidence, request timelines, and document alternatives.</span></li>
+          </ul>
+          <div class="deliverable"><b>Deliverable:</b> a ranked interaction and vendor issue list.</div>
+        </article>
+        <article class="plan-week black-top">
+          <p class="label">Week 4</p>
+          <h3>Retest + sustain</h3>
+          <ul class="action-list">
+            <li><b>Verify corrections</b><span>Reproduce the original barrier and test the updated task.</span></li>
+            <li><b>Record unresolved work</b><span>Assign an owner, target date, priority, and interim path.</span></li>
+            <li><b>Add release checks</b><span>Include accessibility before pages, posts, documents, and features publish.</span></li>
+            <li><b>Schedule the next review</b><span>Monitor priority pages and invite accessibility feedback.</span></li>
+          </ul>
+          <div class="deliverable"><b>Deliverable:</b> an ongoing review cadence and public feedback route.</div>
+        </article>
+      </div>
+    `,
+  },
+  {
+    number: 29,
+    id: "tracker",
+    ch: "c6",
+    title: "Track the barrier, owner, correction, and evidence",
+    theme: "white",
+    body: `
+      <p class="lead narrow">One tracked example is worth more than a long untracked list. Record every barrier with the fields below&#8212;shown here filled in for the keyboard barrier from page 26.</p>
+      <div class="tracker-sheet" aria-label="Barrier tracking template">
+        <div><span>Page or process</span><b>Appointment scheduling</b></div>
+        <div><span>Barrier</span><b>Date picker cannot be used by keyboard.</b></div>
+        <div><span>Task affected</span><b>Select a date and request a visit.</b></div>
+        <div><span>Priority</span><b>Critical</b></div>
+        <div><span>Owner</span><b>Web platform lead</b></div>
+        <div><span>Planned action</span><b>Replace with keyboard-operable date input; preserve visible focus.</b></div>
+        <div><span>Status</span><b>In progress</b></div>
+        <div><span>Dates</span><b>Found: Aug 4 &#183; Recheck: Aug 11</b></div>
+        <div><span>Verification evidence</span><b>Complete booking with Tab, arrow keys, Enter, and screen reader.</b></div>
+      </div>
+      <div class="copy-report">
+        <p class="label">Copy-ready issue report</p>
+        <p><b>Location:</b> [page address and element]<br>
+        <b>Observed barrier:</b> [what happened]<br>
+        <b>Expected experience:</b> [what should be possible]<br>
+        <b>Task or people affected:</b> [impact]<br>
+        <b>How to reproduce:</b> [short steps]<br>
+        <b>Requested review:</b> [specific correction or standard to evaluate]<br>
+        <b>Verification:</b> [how the corrected experience will be checked]</p>
+      </div>
+      <p class="endnote push-bottom">A barrier is not resolved when the code changes. It is resolved when the original task can be completed and the result has been verified.</p>
+    `,
+  },
+  {
+    number: 30,
+    id: "resources",
+    ch: "c6",
+    title: "Keep learning. Keep checking. Keep listening.",
+    theme: "lime",
+    body: `
+      <div class="grid grid-7-5 resources-layout">
+        <div>
+          <h3 class="col-title">Authoritative starting points</h3>
+          <ul class="resource-list">
+            <li><a target="_blank" rel="noopener" href="https://www.w3.org/WAI/">W3C Web Accessibility Initiative (WAI)</a><span>Standards, tutorials, planning, evaluation, and education.</span><i>w3.org/WAI</i></li>
+            <li><a target="_blank" rel="noopener" href="https://www.w3.org/WAI/standards-guidelines/wcag/">WCAG 2 overview</a><span>How the international standard is organized and used.</span><i>w3.org/WAI/standards-guidelines/wcag</i></li>
+            <li><a target="_blank" rel="noopener" href="https://www.w3.org/WAI/WCAG22/quickref/">How to meet WCAG 2: quick reference</a><span>Customizable criteria, techniques, and failures.</span><i>w3.org/WAI/WCAG22/quickref</i></li>
+            <li><a target="_blank" rel="noopener" href="https://www.w3.org/WAI/test-evaluate/easy-checks/">W3C easy checks</a><span>A first review of selected accessibility basics.</span><i>w3.org/WAI/test-evaluate/easy-checks</i></li>
+            <li><a target="_blank" rel="noopener" href="https://www.ada.gov/resources/web-guidance/">U.S. DOJ: web accessibility and the ADA</a><span>Official general guidance; consult current law and counsel for legal decisions.</span><i>ada.gov/resources/web-guidance</i></li>
+            <li><a target="_blank" rel="noopener" href="https://wave.webaim.org/">WAVE evaluation tool</a><span>Automated assistance that still requires human review.</span><i>wave.webaim.org</i></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="col-title">Quick glossary</h3>
+          <dl class="glossary">
+            <dt>Alternative text</dt><dd>A written alternative communicating an image&#8217;s purpose or information.</dd>
+            <dt>Captions</dt><dd>Synchronized text representing speech and meaningful sound.</dd>
+            <dt>Keyboard focus</dt><dd>The element currently selected to receive keyboard input.</dd>
+            <dt>Screen reader</dt><dd>Software that communicates digital content through speech, braille, or both.</dd>
+            <dt>Semantic structure</dt><dd>Meaning communicated through correctly identified elements, not appearance alone.</dd>
+            <dt>WCAG</dt><dd>Web Content Accessibility Guidelines, developed through the W3C process.</dd>
+          </dl>
+        </div>
+      </div>
+      <div class="final-action">
+        <p class="label">Your next step</p>
+        <h3>Choose one important page. Complete a keyboard, zoom, content, media, and form check. Document one barrier, assign it, improve it, and recheck.</h3>
+        <a target="_blank" rel="noopener" href="https://www.oneweb.social/">Continue with OneWeb &#8594;</a>
+      </div>
+      <p class="disclaimer push-bottom">Educational resource only. This guide is not a comprehensive accessibility audit, certification, guarantee of conformance, or legal determination. Consult applicable standards, qualified accessibility professionals, disabled users, and legal counsel when appropriate.</p>
+    `,
+  },
+];
+
+const css = `
+  @page { size: Letter; margin: 0; }
+  /*
+    OneWeb design tokens, standardized to the website palette (src/App.tsx).
+    Contrast (WCAG): black on blue 5.79, black on orange 6.71, black on lime 17.9,
+    black on red 5.31, blue-dark on white 6.34, orange-dark on white 7.27,
+    gray on white 8.86. White text on blue/orange/red passes LARGE text only.
+    Orange text on blue (1.16) and lime on white (1.18) are banned pairs.
+  */
+  :root {
+    --blue:#3083fd; --blue-dark:#005bc6; --pale:#dcecff; --lime:#ccff00;
+    --orange:#ff5a00; --orange-dark:#9c3300; --red:#ff0038;
+    --ink:#000; --gray:#424b55; --white:#fff; --soft:#f4f8f9;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; background:#333; color:var(--ink); font-family:Arial,Helvetica,sans-serif; font-size:13.5px; line-height:1.42; }
+  body { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+  p, h1, h2, h3, ul, ol, dl, figure { margin-top:0; }
+  p { margin-bottom:.13in; }
+  h1, h2, h3 { font-family:Impact,"Arial Narrow",Arial,sans-serif; font-weight:400; text-transform:uppercase; letter-spacing:.005em; }
+  h2 { font-size:24px; line-height:1.02; margin-bottom:.12in; }
+  h3 { font-size:20px; line-height:1.05; margin-bottom:.08in; }
+  a { color:var(--blue-dark); text-decoration-thickness:1.5px; text-underline-offset:2px; }
+  code, kbd { font-family:"Courier New",monospace; }
+  small { font-size:11px; line-height:1.35; }
+
+  /* ---- Page shell: fixed 11in page, flex column inside. The body flexes so a
+     two-line title grows the band without pushing content past the footer. ---- */
+  .page { width:8.5in; height:11in; display:flex; flex-direction:column; overflow:hidden; background:var(--white); break-after:page; }
+  .page:last-child { break-after:auto; }
+  .page.pale { background:var(--pale); }
+  .page.blue { background:var(--blue); }
+  .page.black { background:var(--ink); color:var(--white); }
+  .page.lime { background:var(--lime); }
+  .page-header { flex:0 0 auto; height:.68in; padding:.14in .44in .08in; display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid rgba(0,0,0,.13); }
+  .black .page-header { border-color:rgba(255,255,255,.28); }
+  .brand { display:flex; align-items:center; gap:.08in; }
+  .brand img { width:.34in; height:.34in; object-fit:contain; }
+  .brand b { font-family:Impact,"Arial Narrow",Arial,sans-serif; font-size:23px; font-weight:400; line-height:1; text-transform:uppercase; }
+  .chapter { display:flex; align-items:center; gap:.08in; font:700 9.5px/1.2 "Courier New",monospace; letter-spacing:.08em; text-transform:uppercase; }
+  .ch-chip { display:inline-block; width:.13in; height:.13in; border:1.5px solid var(--ink); background:var(--ch-accent,var(--ink)); }
+  .black .ch-chip { border-color:var(--white); }
+  .page-title-band { flex:0 0 auto; min-height:.95in; padding:.16in .46in .15in; display:flex; align-items:flex-end; border-bottom:4px solid var(--orange); }
+  .blue .page-title-band, .lime .page-title-band { border-bottom-color:var(--ink); }
+  .black .page-title-band { border-bottom-color:var(--lime); }
+  .page-title-band h2 { margin:0; font-size:32px; line-height:.98; }
+  .page-body { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; padding:.3in .46in .32in; }
+  .page-body > *:last-child { margin-bottom:0; }
+  .page-body > .push-bottom { margin-top:auto; }
+  .page-footer { flex:0 0 auto; height:.26in; padding:0 .44in; display:flex; align-items:center; justify-content:space-between; background:var(--ink); color:var(--white); font:8px/1 "Courier New",monospace; letter-spacing:.05em; text-transform:uppercase; }
+  .black .page-footer { background:var(--white); color:var(--ink); }
+
+  /* ---- Shared layout + components ---- */
+  .grid { display:grid; gap:.26in; }
+  .grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .grid-3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .grid-5-7 { grid-template-columns:5fr 7fr; }
+  .grid-7-5 { grid-template-columns:7fr 5fr; }
+  .compact { gap:.2in; }
+  .lead { font-size:15.5px; line-height:1.4; margin-bottom:.18in; }
+  .lead.narrow { max-width:7in; }
+  .label, .kicker { font:700 9.5px/1.2 "Courier New",monospace; letter-spacing:.08em; text-transform:uppercase; }
+  .label { margin-bottom:.07in; }
+  .orange-text { color:var(--orange-dark); }
+  .marker { display:inline-flex; align-items:center; justify-content:center; width:.4in; height:.4in; border:2px solid var(--ink); font:700 11px/1 "Courier New",monospace; background:var(--white); }
+  .marker.lime { background:var(--lime); }
+  .marker.orange { background:var(--orange); }
+  .marker.blue { background:var(--blue); }
+  .marker.ink { background:var(--ink); color:var(--white); }
+  .chip { display:inline-block; padding:.035in .07in; border:2px solid var(--ink); font:700 9.5px/1 "Courier New",monospace; font-style:normal; letter-spacing:.06em; text-transform:uppercase; background:var(--white); color:var(--ink); }
+  .chip.before { background:var(--orange); }
+  .chip.after, .chip.pass { background:var(--lime); }
+  .chip.fail { background:var(--red); }
+  .callout { padding:.16in .2in; border:2px solid var(--ink); margin-bottom:.2in; color:var(--ink); }
+  .callout.lime { background:var(--lime); }
+  .callout.orange { background:var(--orange); }
+  .callout h3 { font-size:20px; }
+  .callout p:last-child { margin-bottom:0; }
+  .endnote { margin-top:.2in; padding-top:.14in; border-top:2px solid var(--ink); }
+  .remember { margin-top:.2in; padding:.14in .18in; background:var(--ink); color:var(--white); }
+  .report-line { margin-top:.2in; padding:.15in .18in; border-left:6px solid var(--orange); background:var(--soft); }
+  .report-line.on-blue { background:var(--white); }
+  .scope-note { margin-top:.24in; padding-top:.13in; border-top:2px solid var(--ink); font-size:11px; color:var(--gray); }
+  .number-list { padding-left:.3in; margin-bottom:0; }
+  .number-list li { padding:.03in 0 .07in .04in; }
+  .number-list.tight li { padding-bottom:.04in; }
+  .checklist { list-style:none; padding:0; margin:.06in 0 .16in; }
+  .checklist li { position:relative; padding:0 0 .08in .24in; }
+  .checklist li::before { content:""; position:absolute; left:0; top:.045in; width:.12in; height:.12in; border:2px solid var(--ink); background:var(--lime); }
+  .black .checklist li::before { border-color:var(--white); }
+  .checklist.large li { padding-bottom:.11in; }
+  .figure-box { margin:0 0 .2in; border:3px solid var(--ink); background:var(--white); overflow:hidden; box-shadow:.07in .07in 0 var(--ink); }
+  .black .figure-box { box-shadow:.07in .07in 0 var(--lime); }
+  .figure-box img { display:block; width:100%; height:100%; object-fit:contain; object-position:center; }
+  .standards-note { padding:.16in .22in; border-left:7px solid var(--orange); background:var(--white); color:var(--ink); }
+  .standards-note h3 { margin-bottom:.04in; }
+  .standards-note p:last-child { margin-bottom:0; }
+
+  /* ---- Cover ---- */
+  .cover-page { background:var(--blue); }
+  .cover-page .page-body { position:relative; display:block; padding:0; }
+  .cover-copy { position:absolute; left:.62in; top:.92in; width:7.26in; z-index:2; }
+  .cover-copy .kicker { display:inline-block; padding:.09in .13in; background:var(--orange); border:2px solid var(--ink); }
+  .cover-copy h1 { margin:.26in 0 .2in; font-size:78px; line-height:.92; }
+  .cover-copy .hl { display:inline-block; padding:.02in .1in .07in; background:var(--lime); }
+  .cover-deck { width:5.9in; font-size:19px; line-height:1.4; }
+  .cover-tags { display:flex; flex-wrap:wrap; gap:.1in; width:5in; margin-top:.26in; }
+  .cover-tags span { padding:.09in .15in; background:var(--white); border:2px solid var(--ink); font:700 10px/1 "Courier New",monospace; text-transform:uppercase; }
+  .cover-art { position:absolute; right:.62in; bottom:1.32in; width:4.05in; margin:0; border:3px solid var(--ink); background:var(--white); box-shadow:.09in .09in 0 var(--ink); }
+  .cover-art img { display:block; width:100%; height:auto; }
+  .cover-ribbon { position:absolute; left:.62in; bottom:.5in; width:7.26in; padding:.13in; border:3px solid var(--ink); background:var(--ink); color:var(--white); text-align:center; font:700 11px/1 "Courier New",monospace; letter-spacing:.12em; text-transform:uppercase; }
+
+  /* ---- Page 2: table of contents ---- */
+  .toc { padding:.26in; border:3px solid var(--ink); background:var(--white); box-shadow:.09in .09in 0 var(--ink); align-self:start; }
+  .toc h2 { font-size:28px; margin-bottom:.1in; }
+  .toc a { display:grid; grid-template-columns:.4in 1fr auto; gap:.12in; align-items:center; padding:.17in 0; border-top:1px solid rgba(0,0,0,.35); color:var(--ink); text-decoration:none; }
+  .toc a:first-of-type { border-top:3px solid var(--ink); }
+  .toc a span { font:700 11px/1 "Courier New",monospace; color:var(--orange-dark); }
+  .toc a b { font-size:15px; }
+  .toc a small { color:var(--gray); font-size:11px; }
+  .after-callout { margin-top:.24in; }
+
+  /* ---- Page 3 ---- */
+  .definition { margin-bottom:.3in; padding:.3in .34in; border:3px solid var(--ink); background:var(--lime); box-shadow:.09in .09in 0 var(--ink); font-size:22px; line-height:1.38; color:var(--ink); }
+  .definition p { margin:0; }
+  #understand .grid-3 { flex:1 1 auto; align-content:center; margin-bottom:.26in; }
+  .plain-card { display:flex; flex-direction:column; padding:.2in .18in .16in; border:3px solid var(--ink); background:var(--white); color:var(--ink); box-shadow:.06in .06in 0 var(--ink); }
+  .plain-card h3 { font-size:24px; }
+  .plain-card small { display:block; margin-top:auto; padding-top:.1in; border-top:1px solid rgba(0,0,0,.3); color:var(--gray); }
+  .bottom-statement { display:grid; grid-template-columns:.6in 1fr; gap:.14in; align-items:center; padding:.18in .24in; background:var(--ink); color:var(--white); }
+  .big-quote { font-family:Georgia,serif; font-size:60px; line-height:.6; color:var(--lime); }
+  .bottom-statement p { margin:0; font-size:15.5px; }
+  .bottom-statement cite { display:block; margin-top:.07in; color:var(--lime); font:700 10px/1.2 "Courier New",monospace; font-style:normal; text-transform:uppercase; letter-spacing:.04em; }
+
+  /* ---- Page 4 ---- */
+  .task-path { display:grid; grid-template-columns:repeat(4,1fr); margin:.26in 0; border-block:3px solid var(--ink); background:var(--soft); }
+  .task-path div { min-height:1.5in; padding:.16in; border-right:1px solid var(--ink); }
+  #why-it-matters .grid-2 { flex:1 1 auto; margin-bottom:.2in; }
+  #why-it-matters .callout { display:flex; flex-direction:column; justify-content:center; margin-bottom:0; padding:.24in .26in; }
+  #why-it-matters .callout h3 { font-size:26px; margin-bottom:.12in; }
+  #why-it-matters .impact-line { margin:.16in 0 0; padding-top:.14in; border-top:2px solid rgba(0,0,0,.5); }
+  #why-it-matters .callout p:last-of-type { margin-bottom:0; }
+  .task-path div:last-child { border-right:0; }
+  .task-path b { display:block; margin-bottom:.06in; font:400 22px/1 Impact,"Arial Narrow",Arial,sans-serif; text-transform:uppercase; }
+  .task-path span { font-size:12px; }
+
+  /* ---- Page 5 ---- */
+  .profile-cards { flex:1 1 auto; margin-bottom:.22in; }
+  .access-profile { display:flex; flex-direction:column; padding:.26in; border:3px solid var(--ink); color:var(--ink); }
+  .blue-card { background:var(--blue); }
+  .orange-card { background:var(--orange); }
+  .profile-icon { width:.9in; height:.9in; display:flex; align-items:center; justify-content:center; margin-bottom:.2in; border:3px solid var(--ink); background:var(--white); }
+  .profile-icon svg { width:.55in; height:.55in; fill:none; stroke:var(--ink); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .access-profile h3 { font-size:28px; }
+  .access-profile p { font-size:15px; }
+  .helps-strip { margin-top:auto; padding:.14in .16in; background:var(--white); border:2px solid var(--ink); font-size:12.5px; }
+  .barrier-strip { margin-top:.14in; padding:.14in .16in; background:var(--ink); color:var(--white); font-size:12.5px; }
+
+  /* ---- Page 6 ---- */
+  .profile-grid { flex:1 1 auto; display:grid; grid-template-columns:repeat(2,1fr); align-content:center; gap:.55in .3in; margin-bottom:.22in; }
+  .profile-grid article { display:grid; grid-template-columns:.5in 1fr; gap:.14in; align-items:start; padding-top:.16in; border-top:3px solid var(--ink); }
+  .profile-grid h3 { font-size:24px; }
+  .profile-grid small { display:block; margin-top:.1in; padding-top:.08in; border-top:1px solid rgba(0,0,0,.3); color:var(--gray); }
+
+  /* ---- Page 7 ---- */
+  .scenario-captions { display:grid; grid-template-columns:repeat(3,1fr); gap:.2in; margin-top:.1in; }
+  .scenario-captions article { display:grid; grid-template-columns:.4in 1fr; gap:.12in; align-items:start; padding-top:.16in; border-top:3px solid var(--ink); }
+  .scenario-captions h3 { margin-bottom:.05in; }
+  .scenario-captions p { margin-bottom:.07in; font-size:12.5px; }
+  .scenario-captions .needs { margin:0; padding:.08in .1in; background:var(--white); border-left:4px solid var(--lime); font-size:12px; }
+
+  /* ---- Page 8 ---- */
+  .pour-grid { flex:1 1 auto; display:grid; grid-template-columns:repeat(2,1fr); gap:.2in; margin-bottom:.24in; }
+  .pour-grid article { display:grid; grid-template-columns:.7in 1fr; gap:.16in; align-items:center; padding:.18in; border:2px solid var(--white); }
+  .pour-grid article > span { display:flex; align-items:center; justify-content:center; width:.62in; height:.62in; border:2px solid var(--ink); color:var(--ink); font:400 32px/1 Impact,"Arial Narrow",Arial,sans-serif; }
+  .pour-grid article > span.lime { background:var(--lime); }
+  .pour-grid article > span.orange { background:var(--orange); }
+  .pour-grid h3 { margin-bottom:.03in; font-size:24px; }
+  .pour-grid p { margin-bottom:.04in; }
+  .pour-grid small { color:var(--pale); }
+
+  /* ---- Page 9 ---- */
+  .testing-stack { width:7.2in; flex:1 1 auto; display:flex; flex-direction:column; justify-content:center; margin:0 auto .2in; }
+  .testing-stack article { margin:0 auto .2in; padding:.22in .26in; border:3px solid var(--ink); background:var(--white); }
+  .testing-stack article:last-child { margin-bottom:0; }
+  .testing-stack .auto { width:72%; }
+  .testing-stack .manual { width:86%; background:var(--blue); }
+  .testing-stack .users { width:100%; background:var(--lime); }
+  .testing-stack article span { float:right; font:700 9.5px/1.2 "Courier New",monospace; text-transform:uppercase; }
+  .testing-stack .auto span { color:var(--blue-dark); }
+  .testing-stack h3 { margin-bottom:.05in; }
+  .testing-stack p { margin-bottom:.05in; }
+  .formula { display:flex; align-items:center; justify-content:center; gap:.12in; padding:.16in; background:var(--ink); color:var(--white); }
+  .formula span { padding:.07in .1in; border:1px solid var(--white); }
+  .formula i { color:var(--lime); font-style:normal; font-size:18px; }
+
+  /* ---- Page 10 ---- */
+  .contrast-stage { padding:.18in; border:3px solid var(--ink); background:var(--orange); box-shadow:.07in .07in 0 var(--ink); align-self:start; }
+  .contrast-demo { display:grid; gap:.16in; margin-top:.1in; }
+  .contrast-demo > div { min-height:2.6in; display:flex; flex-direction:column; justify-content:center; padding:.22in; border:3px solid var(--ink); }
+  .contrast-demo b { font-size:28px; display:block; }
+  .contrast-demo span { font-size:16px; }
+  .contrast-demo .faint { background:var(--white); }
+  .contrast-demo .faint > div { color:#c8cdd5; }
+  .contrast-demo .clear { background:var(--ink); color:var(--white); }
+  .contrast-demo small { margin-top:.14in; font:700 9.5px/1.4 "Courier New",monospace; text-transform:uppercase; }
+  .contrast-demo .faint small { color:var(--ink); }
+  .mini-standard { margin-top:.16in; padding:.14in; background:var(--lime); border:2px solid var(--ink); font-size:11px; }
+  .ratio-strip { display:grid; grid-template-columns:repeat(3,1fr); margin-top:.2in; background:var(--ink); color:var(--white); }
+  .ratio-strip > div { padding:.14in .1in; border-right:1px solid rgba(255,255,255,.4); text-align:center; }
+  .ratio-strip > div:last-child { border-right:0; }
+  .ratio-strip b { display:block; margin-bottom:.04in; font:400 28px/1 Impact,"Arial Narrow",Arial,sans-serif; color:var(--lime); }
+  .ratio-strip span { font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; }
+
+  /* ---- Page 11 ---- */
+  .reflow-comparison { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.2in; margin-bottom:.22in; }
+  .reflow-state { border:3px solid var(--ink); background:var(--white); }
+  .state-label { display:flex; align-items:center; justify-content:space-between; padding:.08in .12in; border-bottom:3px solid var(--ink); }
+  .state-label b { font:400 20px/1 Impact,"Arial Narrow",Arial,sans-serif; text-transform:uppercase; }
+  .before-state .state-label { background:var(--orange); }
+  .after-state .state-label { background:var(--lime); }
+  .mock-browser { margin:.12in; border:2px solid var(--ink); }
+  .mock-top { height:.24in; display:flex; align-items:center; gap:.05in; padding:0 .08in; background:var(--ink); color:var(--white); }
+  .mock-top i { width:.06in; height:.06in; background:var(--orange); }
+  .mock-top span { margin-left:auto; font:700 8px/1 "Courier New",monospace; }
+  .clip-window, .good-content { height:2.5in; padding:.18in .16in; overflow:hidden; }
+  .wide-content { width:150%; }
+  .wide-content small, .good-content small { font-size:11px; }
+  .wide-content h3, .good-content h3 { margin:.1in 0 .06in; font-size:19px; }
+  .wide-content h3 { width:5in; white-space:nowrap; }
+  .wide-line { width:5.4in; white-space:nowrap; font-size:11px; }
+  .wide-content button { margin-left:2.9in; margin-top:.35in; }
+  .good-content p { margin:0 0 .08in; font-size:11px; }
+  .mock-browser button { padding:.05in .09in; border:2px solid var(--ink); background:var(--lime); font-size:10px; font-weight:700; }
+  .state-result { margin:0; padding:.1in .12in .12in; font:700 9.5px/1.3 "Courier New",monospace; text-transform:uppercase; }
+  .before-state .state-result { color:var(--orange-dark); }
+  .adapt-checks { position:relative; gap:.26in; }
+  .adapt-checks::before { content:""; position:absolute; left:.2in; right:.2in; top:.2in; height:2px; background:var(--ink); }
+  .adapt-check { position:relative; padding:0 .04in; }
+  .adapt-check .marker { position:relative; z-index:1; }
+  .adapt-check h3 { margin:.12in 0 .06in; }
+  .adapt-check p { margin-bottom:.1in; font-size:12.5px; }
+  .error-demo { margin-top:.02in; padding:.1in; border:2px solid var(--ink); background:var(--soft); }
+  .error-demo .demo-label { display:block; margin-bottom:.05in; font:700 9.5px/1.2 "Courier New",monospace; text-transform:uppercase; }
+  .error-demo .field-label { display:block; margin-bottom:.03in; font-size:11px; font-weight:700; }
+  .field-mock { width:100%; height:.26in; border:2px solid var(--ink); background:var(--white); }
+  .error-message { display:flex; align-items:center; gap:.06in; margin:.06in 0 0; font-size:11px; font-weight:700; }
+  .error-message strong { display:flex; align-items:center; justify-content:center; flex:0 0 .18in; width:.18in; height:.18in; background:var(--ink); color:var(--white); font:700 10px/1 Arial,sans-serif; }
+
+  /* ---- Page 12 ---- */
+  .image-text-layout { gap:.3in; margin-bottom:.2in; }
+  .centered-figure { margin-left:auto; margin-right:auto; }
+  .alt-example { margin:0 0 .14in; padding:.12in .15in; border-left:6px solid var(--orange); background:var(--white); }
+  .alt-example span { display:block; margin-bottom:.06in; }
+  .alt-example code { font-size:11px; font-weight:700; }
+  .alt-example p { margin:0; }
+  .alt-example + h3 { margin-top:.2in; }
+
+  /* ---- Page 13 ---- */
+  .image-decision-list { flex:1 1 auto; display:grid; align-content:stretch; border-top:3px solid var(--ink); margin-bottom:.22in; }
+  .image-decision-list article { display:grid; grid-template-columns:.66in 2.5in 1fr; gap:.18in; align-items:center; min-height:1.55in; padding:.13in .02in; border-bottom:2px solid var(--ink); }
+  .decision-symbol { width:.6in; height:.6in; display:flex; align-items:center; justify-content:center; border:2px solid var(--ink); background:var(--white); }
+  .decision-symbol svg { width:.38in; height:.38in; fill:none; stroke:var(--ink); stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+  .orange-symbol { background:var(--orange); }
+  .blue-symbol { background:var(--blue); }
+  .lime-symbol { background:var(--lime); }
+  .black-symbol { background:var(--ink); }
+  .black-symbol svg { stroke:var(--white); }
+  .decision-question .label { margin-bottom:.04in; }
+  .decision-question h3 { margin-bottom:.04in; }
+  .decision-question p:last-child { margin:0; font-size:12px; }
+  .decision-answer { padding:.1in .14in; border-left:6px solid var(--orange); background:var(--soft); }
+  .decision-answer b { display:block; margin-bottom:.04in; font:400 17px/1 Impact,"Arial Narrow",Arial,sans-serif; text-transform:uppercase; }
+  .decision-answer p { margin:0 0 .06in; font-size:11px; line-height:1.32; }
+  .decision-answer code { display:block; padding:.05in .08in; background:var(--white); border:1px solid rgba(0,0,0,.35); font:700 10px/1.3 "Courier New",monospace; overflow-wrap:anywhere; }
+  .purpose-takeaway { display:flex; align-items:center; justify-content:space-between; gap:.25in; padding:.16in .2in; background:var(--ink); color:var(--white); }
+  .purpose-takeaway b { max-width:4.6in; font:400 20px/1.1 Impact,"Arial Narrow",Arial,sans-serif; text-transform:uppercase; }
+  .purpose-takeaway span { max-width:2.3in; font-size:11px; color:var(--pale); }
+
+  /* ---- Page 14 ---- */
+  .caption-guidance { display:grid; grid-template-columns:3fr 2fr; gap:.4in; padding-top:.2in; border-top:3px solid rgba(255,255,255,.4); }
+  .caption-guidance h3 { font-size:24px; }
+  .caption-guidance .checklist { display:grid; grid-template-columns:1fr 1fr; gap:.08in .18in; margin-top:.12in; }
+  .caption-guidance .checklist li { margin:0; padding-bottom:0; font-size:12.5px; }
+
+  /* ---- Page 15 ---- */
+  .media-practices { margin-bottom:.22in; }
+  .media-practices article { display:flex; flex-direction:column; min-height:4.7in; padding:.24in; border:3px solid var(--ink); background:var(--white); }
+  .media-practices p { font-size:14px; }
+  .media-practices h3 { font-size:24px; }
+  .practice-icon { width:.62in; height:.62in; display:flex; align-items:center; justify-content:center; margin-bottom:.16in; border:2px solid var(--ink); font:400 20px/1 Impact,"Arial Narrow",Arial,sans-serif; }
+  .practice-icon.lime { background:var(--lime); }
+  .practice-icon.orange { background:var(--orange); }
+  .practice-icon.blue { background:var(--blue); }
+  .media-practices small { display:block; margin-top:auto; padding-top:.1in; border-top:1px solid rgba(0,0,0,.3); color:var(--gray); }
+  .story-strip { display:grid; grid-template-columns:1.15fr repeat(3,1fr); border-block:3px solid var(--ink); background:var(--white); }
+  .story-strip > * { padding:.13in; border-right:1px solid var(--ink); font-size:11.5px; }
+  .story-strip > *:last-child { border-right:0; }
+  .story-strip b { background:var(--orange); font:400 16px/1.15 Impact,"Arial Narrow",Arial,sans-serif; text-transform:uppercase; }
+
+  /* ---- Page 16 ---- */
+  .key-row { display:grid; grid-template-columns:repeat(5,1fr); gap:.12in; margin-bottom:.2in; }
+  .key-row > div { display:flex; flex-direction:column; gap:.06in; align-items:flex-start; padding:.1in; border:2px solid var(--ink); background:var(--white); }
+  .key-row kbd { padding:.05in .08in; border:2px solid var(--ink); border-bottom-width:4px; background:var(--soft); font-weight:700; font-size:11px; }
+  .key-row span { font-size:10.5px; }
+  .quick-row { display:grid; grid-template-columns:1.1fr repeat(4,1fr); margin-bottom:.2in; border:3px solid var(--ink); background:var(--white); }
+  .quick-row > div { padding:.13in .11in; border-right:1px solid var(--ink); font-size:11.5px; }
+  .quick-row > div:last-child { border-right:0; }
+  .quick-row .qr-title { display:flex; align-items:center; background:var(--lime); font:400 18px/1.1 Impact,"Arial Narrow",Arial,sans-serif; text-transform:uppercase; }
+  .quick-row b { display:block; margin-bottom:.04in; font:700 11px/1 "Courier New",monospace; color:var(--orange-dark); }
+
+  /* ---- Page 17 ---- */
+  .focus-demo { display:grid; grid-template-columns:1fr .45in 1fr; gap:.18in; align-items:stretch; margin-bottom:.26in; }
+  .mock-nav, .mock-dialog { padding:.24in; border:3px solid var(--ink); background:var(--white); box-shadow:.06in .06in 0 var(--ink); }
+  .mock-nav { display:grid; gap:.2in; align-content:center; font-weight:700; font-size:14px; }
+  .focused { padding:.08in; outline:3px solid var(--blue-dark); outline-offset:2px; background:var(--lime); }
+  .focus-arrow { font-size:34px; text-align:center; align-self:center; }
+  .mock-dialog b { font-size:14px; }
+  .mock-dialog p { margin:.1in 0 .04in; font-size:11px; font-weight:700; }
+  .input-mock { height:.3in; border:2px solid var(--ink); background:var(--soft); }
+  .mock-dialog button { margin:.12in 0; padding:.07in .14in; background:var(--lime); border:2px solid var(--ink); font-size:11px; font-weight:700; }
+  .mock-dialog small { display:block; color:var(--gray); font-size:10.5px; }
+  .compact h3 .marker { width:.3in; height:.3in; font-size:9.5px; vertical-align:-.06in; margin-right:.04in; }
+  #focus .compact { flex:1 1 auto; margin-bottom:.22in; }
+  #focus .compact article { display:flex; flex-direction:column; border:2px solid var(--ink); background:var(--white); padding:.16in; min-height:1.5in; }
+  #focus .compact p { margin-bottom:.12in; }
+  #focus .compact small { margin-top:auto; padding-top:.1in; border-top:1px solid rgba(0,0,0,.3); color:var(--gray); }
+
+  /* ---- Page 18 ---- */
+  .form-layout { flex:1 1 auto; gap:.3in; align-items:start; }
+  .form-demo { padding:.24in; border:3px solid var(--ink); background:var(--white); box-shadow:.08in .08in 0 var(--ink); }
+  .form-demo label { display:block; margin:.15in 0 .05in; font-size:12px; font-weight:700; }
+  .form-demo .optional { font-weight:400; color:var(--gray); }
+  .form-demo input { width:100%; height:.44in; padding:.08in; border:2px solid var(--ink); background:var(--soft); color:var(--gray); font-size:11px; }
+  .form-help { margin:.08in 0 .14in; font-size:10px; color:var(--gray); }
+  .form-demo button { padding:.08in .14in; border:2px solid var(--ink); background:var(--lime); font-size:11px; font-weight:700; }
+
+  /* ---- Page 19 ---- */
+  .error-example { display:flex; flex-direction:column; min-height:2.85in; padding:.22in; border:3px solid var(--ink); background:var(--white); }
+  .weak-error { border-top:8px solid var(--red); }
+  .good-error { border-top:8px solid var(--lime); }
+  .field-line { margin:.08in 0 .04in; font-weight:700; }
+  .fake-input { height:.32in; border:2px solid var(--ink); background:var(--white); }
+  .fake-input.red-border { border:3px solid var(--red); }
+  .red-text { color:var(--red); font-weight:700; margin:.05in 0 0; }
+  .good-error-message { margin:.06in 0 0; font-size:12.5px; }
+  .error-example small { display:block; margin-top:auto; padding-top:.1in; color:var(--gray); }
+  .recovery-path { display:grid; grid-template-columns:repeat(5,1fr); margin:.24in 0; border-block:3px solid var(--ink); background:var(--soft); }
+  .recovery-path span { min-height:1.35in; padding:.14in; border-right:1px solid var(--ink); font-size:11.5px; }
+  .recovery-path span:last-child { border-right:0; }
+  .recovery-path b { display:block; margin-bottom:.05in; font:700 12px/1 "Courier New",monospace; color:var(--orange-dark); }
+
+  /* ---- Page 20 ---- */
+  .structure-map { margin-bottom:.24in; padding:.28in; border:3px solid var(--ink); background:var(--white); color:var(--ink); box-shadow:.08in .08in 0 var(--ink); }
+  .browser-title { margin-bottom:.14in; padding:.09in .12in; background:var(--ink); color:var(--white); font:700 11px/1.2 "Courier New",monospace; }
+  .mock-landmarks { display:flex; align-items:center; gap:.16in; margin-bottom:.16in; padding:.09in .12in; border:2px solid var(--ink); background:var(--soft); }
+  .mock-landmarks span { padding:.045in .07in; background:var(--blue); border:2px solid var(--ink); font:700 9.5px/1 "Courier New",monospace; }
+  .mock-landmarks i { font-style:normal; font-size:12px; font-weight:700; }
+  .h1-node { display:flex; gap:.12in; align-items:center; margin-bottom:.16in; font:400 32px/1 Impact,"Arial Narrow",Arial,sans-serif; text-transform:uppercase; }
+  .h1-node span, .structure-columns span { padding:.045in .07in; background:var(--lime); border:2px solid var(--ink); font:700 9.5px/1 "Courier New",monospace; }
+  .structure-columns { display:grid; grid-template-columns:1fr 1fr; gap:.16in; }
+  .structure-columns > div { min-height:2.1in; padding:.2in; border:2px solid var(--ink); }
+  .structure-columns b { font-size:16px; }
+  .structure-columns ul, .structure-columns td, .structure-columns th { font-size:12px; }
+  .structure-columns b { margin-left:.06in; font-size:14px; }
+  .structure-columns p { margin:.06in 0 .04in; font-size:11px; color:var(--gray); }
+  .structure-columns ul { margin:0; padding-left:.2in; font-size:11px; }
+  .structure-columns table { width:100%; border-collapse:collapse; }
+  .structure-columns th, .structure-columns td { padding:.04in; border:1px solid var(--ink); text-align:left; font-size:10.5px; }
+  .card-row { margin-top:auto; }
+  .card-row article { padding:.16in; border:2px solid var(--ink); background:var(--white); color:var(--ink); }
+  .card-row h3 { font-size:17px; }
+  .card-row p { margin-bottom:0; font-size:12.5px; }
+  #structure .remember { margin-top:.2in; }
+
+  /* ---- Page 21 ---- */
+  .before-after { display:grid; grid-template-columns:1fr .45in 1fr; gap:.18in; align-items:stretch; margin-bottom:.24in; }
+  .before-after article { min-height:2in; padding:.22in; border:3px solid var(--ink); }
+  .link-swap { display:grid; grid-template-columns:1fr 1fr; margin-top:.06in; background:var(--ink); color:var(--white); }
+  .link-swap > div { padding:.18in .2in; }
+  .link-swap > div + div { border-left:1px solid rgba(255,255,255,.4); }
+  .link-swap b { display:block; margin-bottom:.05in; font:400 17px/1 Impact,"Arial Narrow",Arial,sans-serif; text-transform:uppercase; color:var(--lime); }
+  .link-swap span { font-size:12px; }
+  .ba-before { background:var(--soft); }
+  .ba-after { background:var(--lime); }
+  .before-after article p:last-child { margin-bottom:0; }
+  .before-after > div { font-size:34px; text-align:center; align-self:center; }
+
+  /* ---- Page 22 ---- */
+  .doc-flow { display:grid; grid-template-columns:repeat(4,1fr); margin-bottom:.24in; }
+  .doc-flow > div { display:flex; flex-direction:column; min-height:3.1in; padding:.16in; border:2px solid var(--ink); border-right:0; background:var(--white); color:var(--ink); }
+  .doc-flow > div:last-child { border-right:2px solid var(--ink); }
+  .doc-flow .marker { margin-bottom:.14in; }
+  .doc-flow h3 { font-size:17px; }
+  .doc-flow p { margin-bottom:.1in; font-size:12px; }
+  .doc-flow small { margin-top:auto; padding-top:.08in; border-top:1px solid rgba(0,0,0,.3); color:var(--gray); font-size:10.5px; }
+  #publish .grid-2 { flex:1 1 auto; margin-bottom:.2in; }
+  #publish .callout { display:flex; flex-direction:column; justify-content:center; margin-bottom:0; }
+  #publish .callout h3 { font-size:24px; }
+  .endnote.on-blue { border-top-color:var(--ink); }
+
+  /* ---- Page 23 ---- */
+  .social-stage { align-self:start; padding:.22in; border:3px solid var(--ink); background:var(--blue); }
+  .social-post { padding:.16in; border:3px solid var(--ink); background:var(--white); box-shadow:.08in .08in 0 var(--ink); }
+  .social-head { display:flex; align-items:center; gap:.08in; margin-bottom:.1in; }
+  .social-avatar { display:inline-flex; align-items:center; justify-content:center; width:.34in; height:.34in; background:var(--lime); border:2px solid var(--ink); font:700 9.5px/1 "Courier New",monospace; }
+  .flyer-mock { height:2.7in; margin:.08in 0 .14in; display:flex; align-items:center; justify-content:center; background:var(--orange); border:3px solid var(--ink); text-align:center; }
+  .flyer-mock span { font:400 34px/1.08 Impact,"Arial Narrow",Arial,sans-serif; }
+  .social-post p { margin-bottom:.1in; font-size:13px; line-height:1.45; }
+  .post-alt-note { margin:0; padding:.07in .09in; background:var(--soft); border-left:4px solid var(--blue-dark); font:400 10.5px/1.4 "Courier New",monospace; }
+  .access-line-example { padding:.14in .18in; border:2px solid var(--ink); background:var(--white); }
+  .access-line-example p { margin-bottom:.08in; }
+  .access-line-example small { display:block; color:var(--gray); }
+
+  /* ---- Page 24 ---- */
+  .vendor-flow { display:grid; grid-template-columns:1.3fr .25in repeat(3,1fr); gap:.12in; align-items:stretch; margin-bottom:.24in; }
+  .vendor-flow > div { min-height:1in; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.04in; padding:.1in; border:2px solid var(--ink); background:var(--white); text-align:center; }
+  .vendor-flow b { font-size:13px; }
+  .vendor-flow small { font-size:10px; color:var(--gray); }
+  .vendor-flow .org-node { grid-row:span 2; background:var(--ink); color:var(--white); font-weight:700; font-size:14px; }
+  .vendor-flow > span { align-self:center; }
+  .vendor-flow > span { grid-row:span 2; font-size:25px; text-align:center; }
+
+  /* ---- Page 25 ---- */
+  .role-lanes { flex:1 1 auto; display:grid; grid-template-columns:repeat(2,1fr); gap:.4in .24in; align-content:center; margin-bottom:.2in; }
+  .role-lanes article { display:grid; grid-template-columns:1.05in 1fr; grid-template-rows:auto 1fr; gap:.06in .15in; padding:.14in 0 .1in; border-top:3px solid var(--ink); }
+  .role-lanes span { grid-row:span 2; align-self:start; display:flex; align-items:center; justify-content:center; min-height:.7in; padding:.05in; border:2px solid var(--ink); font:700 10px/1.25 "Courier New",monospace; text-transform:uppercase; text-align:center; }
+  .role-lanes span.lime { background:var(--lime); }
+  .role-lanes span.orange { background:var(--orange); }
+  .role-lanes span.blue { background:var(--blue); }
+  .role-lanes b { font-size:14.5px; }
+  .role-lanes small { color:var(--gray); font-size:12px; }
+  .workflow-loop { display:flex; align-items:center; justify-content:space-between; padding:.16in .22in; background:var(--blue); border:3px solid var(--ink); box-shadow:.07in .07in 0 var(--ink); }
+  .workflow-loop b { font:400 20px/1 Impact,"Arial Narrow",Arial,sans-serif; text-transform:uppercase; }
+  .workflow-loop span { font-size:18px; }
+
+  /* ---- Page 26 ---- */
+  .priority-tasks { display:grid; grid-template-columns:repeat(2,1fr); gap:.1in; margin:.06in 0 0; padding:0; list-style:none; }
+  .priority-tasks li { display:flex; align-items:center; justify-content:center; min-height:.62in; padding:.1in .06in; border:1px solid rgba(255,255,255,.7); text-align:center; font-size:13px; }
+  .tasks-note { margin:.18in 0 0; padding-top:.14in; border-top:1px solid rgba(255,255,255,.4); font-size:12.5px; color:var(--pale); }
+  .priority-ladder { display:grid; gap:.16in; align-content:start; }
+  .priority-ladder article { display:grid; grid-template-columns:1.15in 1fr; gap:.12in; align-items:center; min-height:1.35in; padding:.16in; border:2px solid var(--white); color:var(--ink); }
+  .priority-ladder b { font:400 22px/1 Impact,"Arial Narrow",Arial,sans-serif; text-transform:uppercase; }
+  .priority-ladder span { display:block; font-size:12px; }
+  .priority-ladder .critical { background:var(--red); }
+  .priority-ladder .high { background:var(--orange); }
+  .priority-ladder .medium { background:var(--lime); }
+  .priority-ladder .lower { background:var(--pale); }
+  .tier-chip { display:inline-block; margin-bottom:.05in; padding:.03in .07in; background:var(--white); border:2px solid var(--ink); font:700 9.5px/1 "Courier New",monospace; font-style:normal; letter-spacing:.06em; text-transform:uppercase; }
+
+  /* ---- Pages 27-28 ---- */
+  .plan-header { display:grid; grid-template-columns:auto 1fr auto; gap:.12in; align-items:center; margin-bottom:.14in; font:700 10px/1.2 "Courier New",monospace; text-transform:uppercase; }
+  .plan-header div { height:3px; background:var(--ink); }
+  .plan-intro { max-width:7in; margin-bottom:.18in; }
+  .plan-grid { flex:1 1 auto; }
+  .plan-week { display:flex; flex-direction:column; padding:.2in; border:3px solid var(--ink); background:var(--white); box-shadow:.07in .07in 0 var(--ink); }
+  .plan-week h3 { font-size:24px; }
+  .lime-top { border-top:10px solid var(--lime); }
+  .orange-top { border-top:10px solid var(--orange); }
+  .blue-top { border-top:10px solid var(--blue); }
+  .black-top { border-top:10px solid var(--ink); }
+  .action-list { list-style:none; flex:1 1 auto; display:flex; flex-direction:column; justify-content:space-evenly; margin:.12in 0 .16in; padding:0; }
+  .action-list li { display:grid; grid-template-columns:1.3in 1fr; gap:.12in; align-items:center; padding:.13in 0; border-top:1px solid rgba(0,0,0,.3); }
+  .action-list b { font-size:12px; }
+  .action-list span { font-size:12px; }
+  .deliverable { margin-top:auto; padding:.12in; background:var(--pale); border-left:5px solid var(--orange); font-size:12px; }
+
+  /* ---- Page 29 ---- */
+  .tracker-sheet { display:grid; grid-template-columns:1fr 1fr; border:3px solid var(--ink); background:var(--white); }
+  .tracker-sheet > div { min-height:.66in; padding:.09in .12in; border-right:1px solid var(--ink); border-bottom:1px solid var(--ink); }
+  .tracker-sheet > div:nth-child(even) { border-right:0; }
+  .tracker-sheet > div:nth-child(1),
+  .tracker-sheet > div:nth-child(2),
+  .tracker-sheet > div:nth-child(5),
+  .tracker-sheet > div:nth-child(6),
+  .tracker-sheet > div:nth-child(9) { grid-column:1 / -1; border-right:0; }
+  .tracker-sheet > div:last-child { border-bottom:0; }
+  .tracker-sheet span { display:block; margin-bottom:.03in; color:var(--orange-dark); font:700 9.5px/1.2 "Courier New",monospace; text-transform:uppercase; }
+  .tracker-sheet b { font-size:12px; }
+  .copy-report { margin-top:.18in; padding:.16in .2in; background:var(--ink); color:var(--white); }
+  .copy-report p { margin:0; font-size:11px; line-height:1.5; }
+  .copy-report .label { margin-bottom:.06in; color:var(--lime); }
+
+  /* ---- Page 30 ---- */
+  .resources-layout { gap:.4in; }
+  .col-title { font-size:24px; margin-bottom:.1in; }
+  .resource-list { list-style:none; margin:0; padding:0; }
+  .resource-list li { padding:.1in 0 .09in; border-top:2px solid var(--ink); }
+  .resource-list a { color:var(--ink); font-weight:700; font-size:13.5px; }
+  .resource-list li > span { display:block; margin-top:.02in; font-size:11px; }
+  .resource-list i { display:block; margin-top:.03in; font:700 9.5px/1.2 "Courier New",monospace; font-style:normal; }
+  .glossary { margin:0; }
+  .glossary dt { margin-top:.09in; font-weight:700; font-size:12.5px; }
+  .glossary dd { margin:0; font-size:11.5px; }
+  .final-action { margin-top:.2in; padding:.18in .22in; background:var(--blue); border:3px solid var(--ink); box-shadow:.08in .08in 0 var(--ink); color:var(--ink); }
+  .final-action h3 { margin-bottom:.1in; font-size:20px; }
+  .final-action a { display:inline-block; padding:.09in .14in; background:var(--ink); color:var(--white); text-decoration:none; font:700 10px/1 "Courier New",monospace; letter-spacing:.06em; text-transform:uppercase; }
+  .disclaimer { margin-top:.14in; font-size:9.5px; line-height:1.4; }
+
+  @media screen {
+    body { padding:.25in 0; }
+    .page { margin:0 auto .25in; box-shadow:0 0 .2in rgba(0,0,0,.45); }
+  }
+  @media print {
+    html, body { background:var(--white); }
+    .page { margin:0; box-shadow:none; }
+  }
+`;
+
+function footerFor(page) {
+  return `<footer class="page-footer" aria-hidden="true"><span>OneWeb / Digital Accessibility Awareness &amp; Education</span><span>${String(
+    page.number
+  ).padStart(2, "0")}</span></footer>`;
+}
+
+function regularPage(page) {
+  const chapter = CHAPTERS[page.ch];
+  return `
+    <section class="page ${page.theme || "white"}" id="${page.id}" aria-labelledby="title-${page.id}">
+      <header class="page-header">
+        <div class="brand"><img src="${logo}" alt=""><b>OneWeb</b></div>
+        <div class="chapter"><span class="ch-chip" style="--ch-accent:${chapter.accent}" aria-hidden="true"></span>${chapter.label}</div>
+      </header>
+      <div class="page-title-band"><h2 id="title-${page.id}">${page.title}</h2></div>
+      <div class="page-body">${page.body}</div>
+      ${footerFor(page)}
+    </section>
+  `;
+}
+
+function coverPage(page) {
+  return `
+    <section class="page cover-page" id="${page.id}" aria-labelledby="title-cover">
+      <div class="page-body">${page.body}</div>
+      ${footerFor(page)}
+    </section>
+  `;
+}
+
+const html = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="OneWeb Movement">
+  <meta name="description" content="A practical, action-oriented guide to digital accessibility for businesses and organizations.">
+  <title>Digital Accessibility in Practice | OneWeb Movement</title>
+  <style>${css}</style>
+</head>
+<body>
+  <main>
+    ${pages.map((page) => (page.number === 1 ? coverPage(page) : regularPage(page))).join("\n")}
+  </main>
+</body>
+</html>`;
+
+async function build() {
+  fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(htmlPath, html, "utf8");
+
+  const browser = await chromium.launch({
+    executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    headless: true,
+  });
+  const page = await browser.newPage({ viewport: { width: 1020, height: 1320 } });
+  await page.goto(`file:///${htmlPath.replace(/\\/g, "/")}`, { waitUntil: "networkidle" });
+  await page.emulateMedia({ media: "print" });
+  await page.evaluate(() => document.fonts.ready);
+
+  // Layout, readability, and contrast QA. `fatal` findings fail the build;
+  // `warn` findings are advisory (utilization, letterboxing).
+  const report = await page.evaluate(() => {
+    const fatal = [];
+    const warn = [];
+    const pagesEls = [...document.querySelectorAll(".page")];
+    const pageNum = (el) => pagesEls.indexOf(el.closest(".page")) + 1;
+    const describe = (el) =>
+      `<${el.tagName.toLowerCase()}${el.getAttribute("class") ? ` class="${el.getAttribute("class")}"` : ""}>`;
+
+    const seenIds = new Set();
+    document.querySelectorAll("[id]").forEach((el) => {
+      if (seenIds.has(el.id)) fatal.push(`duplicate id "${el.id}"`);
+      seenIds.add(el.id);
+    });
+
+    const channel = (v) => {
+      v /= 255;
+      return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    const luminance = ([r, g, b]) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+    const parseColor = (s) => {
+      const m = s && s.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);
+      return m ? { rgb: [+m[1], +m[2], +m[3]], a: m[4] === undefined ? 1 : +m[4] } : null;
+    };
+    const backgroundOf = (el) => {
+      let node = el;
+      while (node && node.nodeType === 1) {
+        const c = parseColor(getComputedStyle(node).backgroundColor);
+        if (c && c.a > 0.9) return c.rgb;
+        node = node.parentElement;
+      }
+      return [255, 255, 255];
+    };
+
+    pagesEls.forEach((section, idx) => {
+      const n = idx + 1;
+      const pr = section.getBoundingClientRect();
+      const body = section.querySelector(".page-body");
+      if (body && body.scrollHeight > body.clientHeight + 1) {
+        fatal.push(`Page ${n}: body overflow ${body.scrollHeight - body.clientHeight}px`);
+      }
+      const escapees = [];
+      section.querySelectorAll(".page-body *").forEach((node) => {
+        const r = node.getBoundingClientRect();
+        if (r.height <= 0) return;
+        if (r.bottom > pr.bottom + 1 || r.right > pr.right + 1 || r.left < pr.left - 1) escapees.push(node);
+      });
+      escapees
+        .filter((node) => !escapees.some((other) => other !== node && node.contains(other)))
+        .forEach((node) => fatal.push(`Page ${n}: ${describe(node)} escapes the page edge`));
+      if (body) {
+        const br = body.getBoundingClientRect();
+        let maxBottom = br.top;
+        [...body.children].forEach((child) => {
+          const r = child.getBoundingClientRect();
+          if (r.height > 0) maxBottom = Math.max(maxBottom, r.bottom);
+        });
+        const fill = (maxBottom - br.top) / br.height;
+        if (fill < 0.7) warn.push(`Page ${n}: content fills only ${(fill * 100).toFixed(0)}% of the body`);
+      }
+    });
+
+    // Every visible text node: enforce the 9.5px floor and computed WCAG AA contrast.
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const checked = new Set();
+    while (walker.nextNode()) {
+      const textNode = walker.currentNode;
+      if (!textNode.textContent.trim()) continue;
+      const el = textNode.parentElement;
+      if (!el || checked.has(el)) continue;
+      checked.add(el);
+      if (el.closest('[aria-hidden="true"]')) continue;
+      const cs = getComputedStyle(el);
+      if (cs.display === "none" || cs.visibility === "hidden") continue;
+      const n = pageNum(el);
+      const size = parseFloat(cs.fontSize);
+      const weight = parseInt(cs.fontWeight, 10) || 400;
+      if (size < 9.5) fatal.push(`Page ${n}: ${describe(el)} text is ${size.toFixed(1)}px (floor 9.5px)`);
+      const color = parseColor(cs.color);
+      if (!color) continue;
+      const fg = luminance(color.rgb);
+      const bg = luminance(backgroundOf(el));
+      const ratio = (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05);
+      const large = size >= 24 || (size >= 18.66 && weight >= 700);
+      const need = large ? 3 : 4.5;
+      if (ratio < need) {
+        fatal.push(
+          `Page ${n}: ${describe(el)} contrast ${ratio.toFixed(2)}:1 < ${need}:1 ("${textNode.textContent
+            .trim()
+            .slice(0, 40)}")`
+        );
+      }
+    }
+
+    document.querySelectorAll("img").forEach((img) => {
+      const n = pageNum(img);
+      if (!img.hasAttribute("alt")) fatal.push(`Page ${n}: image missing alt attribute (${img.src.slice(-40)})`);
+      if (!img.naturalWidth) {
+        fatal.push(`Page ${n}: broken image (${img.src.slice(-40)})`);
+        return;
+      }
+      const r = img.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const fit = getComputedStyle(img).objectFit;
+      const boxRatio = r.width / r.height;
+      const naturalRatio = img.naturalWidth / img.naturalHeight;
+      const mismatch = Math.abs(boxRatio / naturalRatio - 1);
+      if ((fit === "cover" || fit === "fill") && mismatch > 0.02) {
+        fatal.push(`Page ${n}: image cropped or distorted (box ${boxRatio.toFixed(2)} vs natural ${naturalRatio.toFixed(2)})`);
+      } else if (fit === "contain" && mismatch > 0.12) {
+        warn.push(`Page ${n}: image letterboxed (box ${boxRatio.toFixed(2)} vs natural ${naturalRatio.toFixed(2)})`);
+      }
+    });
+
+    return { fatal: [...new Set(fatal)], warn: [...new Set(warn)] };
+  });
+
+  if (report.warn.length) {
+    console.warn("LAYOUT_ADVISORIES");
+    report.warn.forEach((w) => console.warn("  " + w));
+  }
+
+  await page.pdf({
+    path: pdfPath,
+    format: "Letter",
+    printBackground: true,
+    preferCSSPageSize: true,
+    tagged: true,
+    outline: true,
+    displayHeaderFooter: false,
+  });
+  await browser.close();
+
+  console.log(
+    JSON.stringify(
+      { htmlPath, pdfPath, pages: pages.length, fatal: report.fatal, advisories: report.warn },
+      null,
+      2
+    )
+  );
+  if (report.fatal.length) {
+    console.error(`BUILD FAILED: ${report.fatal.length} fatal layout/contrast finding(s).`);
+    process.exit(1);
+  }
+}
+
+build().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
