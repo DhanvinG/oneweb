@@ -1077,9 +1077,9 @@ export default function App() {
       <section id="impact" className="relative z-20 isolate w-full bg-[#ff0038] px-6 py-14 md:px-12 md:py-16">
         <div className="mx-auto grid max-w-[1000px] grid-cols-1 justify-items-center gap-x-3 gap-y-12 sm:grid-cols-3 md:gap-x-4 md:gap-y-8">
           {[
-            ['250K+', 'People Reached'],
+            ['200K', 'Accessibility Barriers Found'],
             ['30+', 'Countries'],
-            ['$30K+', 'Funding Raised'],
+            ['3.5K', 'Organizations Reached'],
           ].map(([value, label]) => (
             <div key={label} className="flex w-full flex-col items-center text-center text-white">
               <span
